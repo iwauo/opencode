@@ -88,7 +88,8 @@ const cli = yargs(hideBin(process.argv))
   .fail((msg) => {
     if (
       msg.startsWith("Unknown argument") ||
-      msg.startsWith("Not enough non-option arguments")
+      msg.startsWith("Not enough non-option arguments") ||
+      msg.startsWith("Invalid values:")
     ) {
       cli.showHelp("log")
     }
