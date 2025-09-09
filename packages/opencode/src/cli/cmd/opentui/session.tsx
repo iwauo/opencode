@@ -97,10 +97,16 @@ export function Session() {
           </For>
         </scrollbox>
         <Show when={todo().length > 0}>
-          <box paddingBottom={1} >
+          <box paddingBottom={1}>
             <For each={todo()}>
               {(todo) => (
-                <text fg={todo.status === "in_progress" ? Theme.success : Theme.textMuted}>
+                <text
+                  fg={
+                    todo.status === "in_progress"
+                      ? Theme.success
+                      : Theme.textMuted
+                  }
+                >
                   [{todo.status === "completed" ? "✓" : " "}] {todo.content}
                 </text>
               )}
@@ -147,7 +153,11 @@ function UserMessage(props: { message: UserMessage; parts: Part[] }) {
 
 function AssistantMessage(props: { message: AssistantMessage; parts: Part[] }) {
   return (
-    <For each={props.parts.filter(x => !["step-start", "step-finish"].includes(x.type))}>
+    <For
+      each={props.parts.filter(
+        (x) => !["step-start", "step-finish"].includes(x.type),
+      )}
+    >
       {(part) => (
         <box id={part.id}>
           <Switch>
@@ -172,7 +182,7 @@ function TextPart(props: { part: TextPart; message: AssistantMessage }) {
   const local = useLocal()
 
   return (
-    <box paddingLeft={3} >
+    <box paddingLeft={3}>
       <text>{props.part.text.trim()}</text>
       <text>
         {fg(local.agent.color(agent().name))(Locale.titlecase(agent().name))}{" "}
@@ -408,4 +418,3 @@ function PatchToolPart(props: ToolProps<Tool.Info>) {
     </>
   )
 }
-

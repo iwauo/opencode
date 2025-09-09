@@ -21,7 +21,7 @@ function init() {
     session: Session[]
     todo: {
       [sessionID: string]: Todo[]
-    },
+    }
     message: {
       [sessionID: string]: Message[]
     }
@@ -47,7 +47,7 @@ function init() {
         case "todo.updated":
           console.log(event.properties)
           setStore("todo", event.properties.sessionID, event.properties.todos)
-          break;
+          break
         case "session.updated":
           const result = Binary.search(
             store.session,

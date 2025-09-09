@@ -123,7 +123,10 @@ export function Prompt(props: PromptProps) {
                           draft.input.slice(0, part.source.text.start) +
                           draft.input.slice(part.source.text.end)
                         draft.parts.splice(i, 1)
-                        input.cursorPosition = Math.max(0, part.source.text.start - 1)
+                        input.cursorPosition = Math.max(
+                          0,
+                          part.source.text.start - 1,
+                        )
                         i--
                       }
                     }
@@ -163,15 +166,15 @@ export function Prompt(props: PromptProps) {
                 const sessionID = props.sessionID
                   ? props.sessionID
                   : await (async () => {
-                    const sessionID = await sdk.session
-                      .create({})
-                      .then((x) => x.data!.id)
-                    route.navigate({
-                      type: "session",
-                      sessionID,
-                    })
-                    return sessionID
-                  })()
+                      const sessionID = await sdk.session
+                        .create({})
+                        .then((x) => x.data!.id)
+                      route.navigate({
+                        type: "session",
+                        sessionID,
+                      })
+                      return sessionID
+                    })()
                 const messageID = Identifier.ascending("message")
                 const input = store.input
                 const parts = store.parts
@@ -179,29 +182,28 @@ export function Prompt(props: PromptProps) {
                   input: "",
                   parts: [],
                 })
-                await sdk.session
-                  .prompt({
-                    path: {
-                      id: sessionID,
-                    },
-                    body: {
-                      ...local.model.current(),
-                      messageID,
-                      agent: local.agent.current().name,
-                      model: local.model.current(),
-                      parts: [
-                        {
-                          id: Identifier.ascending("part"),
-                          type: "text",
-                          text: input,
-                        },
-                        ...parts.map((x) => ({
-                          id: Identifier.ascending("part"),
-                          ...x,
-                        })),
-                      ],
-                    },
-                  })
+                await sdk.session.prompt({
+                  path: {
+                    id: sessionID,
+                  },
+                  body: {
+                    ...local.model.current(),
+                    messageID,
+                    agent: local.agent.current().name,
+                    model: local.model.current(),
+                    parts: [
+                      {
+                        id: Identifier.ascending("part"),
+                        type: "text",
+                        text: input,
+                      },
+                      ...parts.map((x) => ({
+                        id: Identifier.ascending("part"),
+                        ...x,
+                      })),
+                    ],
+                  },
+                })
               }}
               ref={(r) => (input = r)}
               onMouseDown={(r) => r.target?.focus()}
@@ -284,13 +286,11 @@ function Autocomplete(props: {
   )
 
   const options = createMemo(() => {
-    const mixed = [
-      ...files().map((x) => ({ type: "file", value: x })),
-    ]
+    const mixed = [...files().map((x) => ({ type: "file", value: x }))]
     const result = fuzzysort.go(filter(), mixed, {
       keys: ["value"],
     })
-    return result.map(arr => arr.obj)
+    return result.map((arr) => arr.obj)
   })
 
   createEffect(() => {
