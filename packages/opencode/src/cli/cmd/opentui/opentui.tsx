@@ -69,7 +69,6 @@ function App() {
 
     if (evt.meta && evt.name === "d") {
       renderer.console.toggle()
-      renderer.console.blur()
       return
     }
     if (evt.meta && evt.name === "m") {

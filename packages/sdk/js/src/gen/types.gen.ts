@@ -39,6 +39,9 @@ export type Event =
       type: "file.edited"
     } & EventFileEdited)
   | ({
+      type: "todo.updated"
+    } & EventTodoUpdated)
+  | ({
       type: "session.updated"
     } & EventSessionUpdated)
   | ({
@@ -458,6 +461,33 @@ export type EventFileEdited = {
   properties: {
     file: string
   }
+}
+
+export type EventTodoUpdated = {
+  type: "todo.updated"
+  properties: {
+    sessionID: string
+    todos: Array<Todo>
+  }
+}
+
+export type Todo = {
+  /**
+   * Brief description of the task
+   */
+  content: string
+  /**
+   * Current status of the task: pending, in_progress, completed, cancelled
+   */
+  status: string
+  /**
+   * Priority level of the task: high, medium, low
+   */
+  priority: string
+  /**
+   * Unique identifier for the todo item
+   */
+  id: string
 }
 
 export type EventSessionUpdated = {
@@ -1338,7 +1368,8 @@ export type ToolRegisterResponses = {
   200: boolean
 }
 
-export type ToolRegisterResponse = ToolRegisterResponses[keyof ToolRegisterResponses]
+export type ToolRegisterResponse =
+  ToolRegisterResponses[keyof ToolRegisterResponses]
 
 export type ToolIdsData = {
   body?: never
@@ -1527,6 +1558,27 @@ export type SessionUpdateResponses = {
 
 export type SessionUpdateResponse =
   SessionUpdateResponses[keyof SessionUpdateResponses]
+
+export type SessionTodoData = {
+  body?: never
+  path: {
+    id: string
+  }
+  query?: {
+    directory?: string
+  }
+  url: "/session/{id}/todo"
+}
+
+export type SessionTodoResponses = {
+  /**
+   * List of todos
+   */
+  200: Array<Todo>
+}
+
+export type SessionTodoResponse =
+  SessionTodoResponses[keyof SessionTodoResponses]
 
 export type SessionChildrenData = {
   body?: never

@@ -27,6 +27,7 @@ import { Identifier } from "../../../../id/id"
 import { createStore, produce } from "solid-js/store"
 import type { FilePart } from "@opencode-ai/sdk"
 import { Instance } from "../../../../project/instance"
+import fuzzysort from "fuzzysort"
 
 export type PromptProps = {
   sessionID?: string
@@ -102,27 +103,32 @@ export function Prompt(props: PromptProps) {
             <input
               onInput={(value) => {
                 let diff = value.length - store.input.length
-                console.log({ diff })
-                setStore(produce((draft) => {
-                  draft.input = value
-                  for (let i = 0; i < draft.parts.length; i++) {
-                    const part = draft.parts[i]
-                    if (!part.source) continue
-                    if (part.source.text.start >= input.cursorPosition) {
-                      part.source.text.start += diff
-                      part.source.text.end += diff
+                setStore(
+                  produce((draft) => {
+                    draft.input = value
+                    for (let i = 0; i < draft.parts.length; i++) {
+                      const part = draft.parts[i]
+                      if (!part.source) continue
+                      if (part.source.text.start >= input.cursorPosition) {
+                        part.source.text.start += diff
+                        part.source.text.end += diff
+                      }
+                      const sliced = draft.input.slice(
+                        part.source.text.start,
+                        part.source.text.end,
+                      )
+                      if (sliced != part.source.text.value && diff < 0) {
+                        diff -= part.source.text.value.length
+                        draft.input =
+                          draft.input.slice(0, part.source.text.start) +
+                          draft.input.slice(part.source.text.end)
+                        draft.parts.splice(i, 1)
+                        input.cursorPosition = Math.max(0, part.source.text.start - 1)
+                        i--
+                      }
                     }
-                    const sliced = draft.input.slice(part.source.text.start, part.source.text.end)
-                    console.log(sliced, part.source.text.value)
-                    if (sliced != part.source.text.value && diff < 0) {
-                      diff -= part.source.text.value.length
-                      draft.input = draft.input.slice(0, part.source.text.start) + draft.input.slice(part.source.text.end)
-                      draft.parts.splice(i, 1)
-                      i--
-                    }
-                    console.log(sliced)
-                  }
-                }))
+                  }),
+                )
                 autocomplete.onInput(value)
               }}
               value={store.input}
@@ -173,7 +179,6 @@ export function Prompt(props: PromptProps) {
                   input: "",
                   parts: [],
                 })
-                console.log("prompting", sessionID)
                 await sdk.session
                   .prompt({
                     path: {
@@ -197,8 +202,6 @@ export function Prompt(props: PromptProps) {
                       ],
                     },
                   })
-                  .then(console.log)
-                  .catch(console.log)
               }}
               ref={(r) => (input = r)}
               onMouseDown={(r) => r.target?.focus()}
@@ -280,6 +283,16 @@ function Autocomplete(props: {
     },
   )
 
+  const options = createMemo(() => {
+    const mixed = [
+      ...files().map((x) => ({ type: "file", value: x })),
+    ]
+    const result = fuzzysort.go(filter(), mixed, {
+      keys: ["value"],
+    })
+    return result.map(arr => arr.obj)
+  })
+
   createEffect(() => {
     filter()
     setStore("selected", 0)
@@ -294,7 +307,6 @@ function Autocomplete(props: {
   }
 
   function show() {
-    console.log(props.input().cursorPosition)
     setStore({
       visible: true,
       index: props.input().cursorPosition,
@@ -371,8 +383,8 @@ function Autocomplete(props: {
       {...SplitBorder}
     >
       <box backgroundColor={Theme.backgroundElement} height={10}>
-        <For each={files()}>
-          {(file, index) => (
+        <For each={options()}>
+          {(option, index) => (
             <box
               paddingLeft={1}
               paddingRight={1}
@@ -383,7 +395,7 @@ function Autocomplete(props: {
               <text
                 fg={index() === store.selected ? Theme.background : Theme.text}
               >
-                {file}
+                {option.value}
               </text>
             </box>
           )}

@@ -5,6 +5,7 @@ import type {
   Session,
   Part,
   Config,
+  Todo,
 } from "@opencode-ai/sdk"
 import { createStore, produce, reconcile } from "solid-js/store"
 import { useSDK } from "./sdk"
@@ -18,6 +19,9 @@ function init() {
     agent: Agent[]
     config: Config
     session: Session[]
+    todo: {
+      [sessionID: string]: Todo[]
+    },
     message: {
       [sessionID: string]: Message[]
     }
@@ -30,6 +34,7 @@ function init() {
     agent: [],
     provider: [],
     session: [],
+    todo: {},
     message: {},
     part: {},
   })
@@ -39,6 +44,10 @@ function init() {
   sdk.event.subscribe().then(async (events) => {
     for await (const event of events.stream) {
       switch (event.type) {
+        case "todo.updated":
+          console.log(event.properties)
+          setStore("todo", event.properties.sessionID, event.properties.todos)
+          break;
         case "session.updated":
           const result = Binary.search(
             store.session,
@@ -104,14 +113,16 @@ function init() {
         return undefined
       },
       async sync(sessionID: string) {
-        const [session, messages] = await Promise.all([
+        const [session, messages, todo] = await Promise.all([
           sdk.session.get({ path: { id: sessionID } }),
           sdk.session.messages({ path: { id: sessionID } }),
+          sdk.session.todo({ path: { id: sessionID } }),
         ])
         setStore(
           produce((draft) => {
             const match = Binary.search(draft.session, sessionID, (s) => s.id)
             draft.session[match.index] = session.data!
+            draft.todo[sessionID] = todo.data ?? []
             draft.message[sessionID] = messages.data!.map((x) => x.info)
             for (const message of messages.data!) {
               draft.part[message.info.id] = message.parts

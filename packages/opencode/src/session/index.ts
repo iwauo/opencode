@@ -394,12 +394,18 @@ export namespace Session {
     msgs = preserve
     for (const msg of remove) {
       await Storage.remove(["message", sessionID, msg.info.id])
-      await Bus.publish(MessageV2.Event.Removed, { sessionID: sessionID, messageID: msg.info.id })
+      await Bus.publish(MessageV2.Event.Removed, {
+        sessionID: sessionID,
+        messageID: msg.info.id,
+      })
     }
     const last = preserve.at(-1)
     if (session.revert.partID && last) {
       const partID = session.revert.partID
-      const [preserveParts, removeParts] = splitWhen(last.parts, (x) => x.id === partID)
+      const [preserveParts, removeParts] = splitWhen(
+        last.parts,
+        (x) => x.id === partID,
+      )
       last.parts = preserveParts
       for (const part of removeParts) {
         await Storage.remove(["part", last.info.id, part.id])
@@ -725,15 +731,28 @@ export namespace Session {
     }
     using abort = lock(input.sessionID)
 
-    const lastSummary = msgs.findLast((msg) => msg.info.role === "assistant" && msg.info.summary === true)
-    if (lastSummary) msgs = msgs.filter((msg) => msg.info.id >= lastSummary.info.id)
+    const lastSummary = msgs.findLast(
+      (msg) => msg.info.role === "assistant" && msg.info.summary === true,
+    )
+    if (lastSummary)
+      msgs = msgs.filter((msg) => msg.info.id >= lastSummary.info.id)
     const numRealUserMsgs = msgs.filter(
-      (m) => m.info.role === "user" && !m.parts.every((p) => "synthetic" in p && p.synthetic),
+      (m) =>
+        m.info.role === "user" &&
+        !m.parts.every((p) => "synthetic" in p && p.synthetic),
     ).length
-    if (numRealUserMsgs === 1 && !session.parentID && isDefaultTitle(session.title)) {
+    if (
+      numRealUserMsgs === 1 &&
+      !session.parentID &&
+      isDefaultTitle(session.title)
+    ) {
       const small = (await Provider.getSmallModel(model.providerID)) ?? model
       const options = {
-        ...ProviderTransform.options(small.providerID, small.modelID, input.sessionID),
+        ...ProviderTransform.options(
+          small.providerID,
+          small.modelID,
+          input.sessionID,
+        ),
         ...small.info.options,
       }
       if (small.providerID === "openai") {
@@ -1084,7 +1103,11 @@ export namespace Session {
           : undefined,
       maxRetries: 3,
       activeTools: Object.keys(tools).filter((x) => x !== "invalid"),
-      maxOutputTokens: ProviderTransform.maxOutputTokens(model.providerID, outputLimit, params.options),
+      maxOutputTokens: ProviderTransform.maxOutputTokens(
+        model.providerID,
+        outputLimit,
+        params.options,
+      ),
       abortSignal: abort.signal,
       stopWhen: async ({ steps }) => {
         if (steps.length >= 1000) {

@@ -28,14 +28,10 @@ export function Session() {
   let scroll: ScrollBoxRenderable
   const session = createMemo(() => sync.session.get(route.sessionID)!)
   const messages = createMemo(() => sync.data.message[route.sessionID] ?? [])
+  const todo = createMemo(() => sync.data.todo[route.sessionID] ?? [])
+  createEffect(() => console.log(todo()))
 
   createEffect(() => sync.session.sync(route.sessionID))
-  createEffect(() => {
-    return
-    const messageID = messages().at(-1)?.id
-    sync.data.part[messageID ?? ""]?.at(-1)?.id
-    scroll.scrollTo(scroll.scrollHeight)
-  })
 
   return (
     <box
@@ -70,7 +66,9 @@ export function Session() {
           </box>
         </box>
         <scrollbox
-          ref={(r: any) => (scroll = r)}
+          ref={(r: any) => {
+            scroll = r
+          }}
           scrollbarOptions={{ visible: false }}
           paddingTop={1}
           paddingBottom={1}
@@ -98,6 +96,17 @@ export function Session() {
             )}
           </For>
         </scrollbox>
+        <Show when={todo().length > 0}>
+          <box paddingBottom={1} >
+            <For each={todo()}>
+              {(todo) => (
+                <text fg={todo.status === "in_progress" ? Theme.success : Theme.textMuted}>
+                  [{todo.status === "completed" ? "✓" : " "}] {todo.content}
+                </text>
+              )}
+            </For>
+          </box>
+        </Show>
         <box flexShrink={0}>
           <Prompt sessionID={route.sessionID} />
         </box>
@@ -138,7 +147,7 @@ function UserMessage(props: { message: UserMessage; parts: Part[] }) {
 
 function AssistantMessage(props: { message: AssistantMessage; parts: Part[] }) {
   return (
-    <For each={props.parts}>
+    <For each={props.parts.filter(x => !["step-start", "step-finish"].includes(x.type))}>
       {(part) => (
         <box id={part.id}>
           <Switch>
@@ -163,7 +172,7 @@ function TextPart(props: { part: TextPart; message: AssistantMessage }) {
   const local = useLocal()
 
   return (
-    <box paddingLeft={3}>
+    <box paddingLeft={3} >
       <text>{props.part.text.trim()}</text>
       <text>
         {fg(local.agent.color(agent().name))(Locale.titlecase(agent().name))}{" "}
@@ -248,9 +257,6 @@ function ToolPart(props: { part: ToolPart; message: AssistantMessage }) {
               <Match when={props.part.tool === "patch"}>
                 <PatchToolPart {...(toolProps() as any)} />
               </Match>
-              <Match when={props.part.tool === "todowrite"}>
-                <TodoWriteToolPart {...(toolProps() as any)} />
-              </Match>
             </Switch>
           </Match>
         </Switch>
@@ -303,7 +309,7 @@ function ReadToolPart(props: ToolProps<typeof ReadTool>) {
     <>
       <text fg={Theme.textMuted}>Read {props.input["filePath"]}</text>
       <box>
-        <text>{hastToStyledText(hast() as any, syntax)}</text>
+        <text>{hast()}</text>
       </box>
     </>
   )
@@ -403,13 +409,3 @@ function PatchToolPart(props: ToolProps<Tool.Info>) {
   )
 }
 
-function TodoWriteToolPart(props: ToolProps<Tool.Info>) {
-  return (
-    <>
-      <text fg={Theme.textMuted}>Todo</text>
-      <box>
-        <text>{props.output?.trim()}</text>
-      </box>
-    </>
-  )
-}

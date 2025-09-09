@@ -25,6 +25,7 @@ import { Global } from "../global"
 import { ProjectRoute } from "./project"
 import { ToolRegistry } from "../tool/registry"
 import { zodToJsonSchema } from "zod-to-json-schema"
+import { Todo } from "../session/todo"
 
 const ERRORS = {
   400: {
@@ -220,14 +221,17 @@ export namespace Server {
     .get(
       "/experimental/tool/ids",
       describeRoute({
-        description: "List all tool IDs (including built-in and dynamically registered)",
+        description:
+          "List all tool IDs (including built-in and dynamically registered)",
         operationId: "tool.ids",
         responses: {
           200: {
             description: "Tool IDs",
             content: {
               "application/json": {
-                schema: resolver(z.array(z.string()).openapi({ ref: "ToolIDs" })),
+                schema: resolver(
+                  z.array(z.string()).openapi({ ref: "ToolIDs" }),
+                ),
               },
             },
           },
@@ -241,7 +245,8 @@ export namespace Server {
     .get(
       "/experimental/tool",
       describeRoute({
-        description: "List tools with JSON schema parameters for a provider/model",
+        description:
+          "List tools with JSON schema parameters for a provider/model",
         operationId: "tool.list",
         responses: {
           200: {
@@ -282,7 +287,9 @@ export namespace Server {
             id: t.id,
             description: t.description,
             // Handle both Zod schemas and plain JSON schemas
-            parameters: (t.parameters as any)?._def ? zodToJsonSchema(t.parameters as any) : t.parameters,
+            parameters: (t.parameters as any)?._def
+              ? zodToJsonSchema(t.parameters as any)
+              : t.parameters,
           })),
         )
       },
@@ -371,6 +378,34 @@ export namespace Server {
         const sessionID = c.req.valid("param").id
         const session = await Session.get(sessionID)
         return c.json(session)
+      },
+    )
+    .get(
+      "/session/:id/todo",
+      describeRoute({
+        description: "Get a session's todo list",
+        operationId: "session.todo",
+        responses: {
+          200: {
+            description: "List of todos",
+            content: {
+              "application/json": {
+                schema: resolver(Todo.Info.array()),
+              },
+            },
+          },
+        },
+      }),
+      zValidator(
+        "param",
+        z.object({
+          id: z.string(),
+        }),
+      ),
+      async (c) => {
+        const sessionID = c.req.valid("param").id
+        const todos = await Todo.get(sessionID)
+        return c.json(todos)
       },
     )
     .get(

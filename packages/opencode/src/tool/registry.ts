@@ -70,9 +70,14 @@ export namespace ToolRegistry {
           base = z.boolean()
           break
         case "array":
-          if (!val.items) throw new Error(`array spec for ${key} requires 'items'`)
+          if (!val.items)
+            throw new Error(`array spec for ${key} requires 'items'`)
           base = z.array(
-            val.items === "string" ? z.string() : val.items === "number" ? z.number() : z.boolean(),
+            val.items === "string"
+              ? z.string()
+              : val.items === "number"
+                ? z.number()
+                : z.boolean(),
           )
           break
         default:
@@ -99,13 +104,22 @@ export namespace ToolRegistry {
       async execute(args) {
         const res = await fetch(input.callbackUrl, {
           method: "POST",
-          headers: { "content-type": "application/json", ...(input.headers ?? {}) },
+          headers: {
+            "content-type": "application/json",
+            ...(input.headers ?? {}),
+          },
           body: JSON.stringify({ args }),
         })
         if (!res.ok) {
-          throw new Error(`HTTP tool callback failed: ${res.status} ${await res.text()}`)
+          throw new Error(
+            `HTTP tool callback failed: ${res.status} ${await res.text()}`,
+          )
         }
-        const json = (await res.json()) as { title?: string; output: string; metadata?: Record<string, any> }
+        const json = (await res.json()) as {
+          title?: string
+          output: string
+          metadata?: Record<string, any>
+        }
         return {
           title: json.title ?? input.id,
           output: json.output ?? "",
@@ -151,7 +165,9 @@ export namespace ToolRegistry {
     if (providerID === "google") {
       return result.map((t) => ({
         ...t,
-        parameters: sanitizeGeminiParameters(t.parameters as unknown as z.ZodTypeAny),
+        parameters: sanitizeGeminiParameters(
+          t.parameters as unknown as z.ZodTypeAny,
+        ),
       }))
     }
 

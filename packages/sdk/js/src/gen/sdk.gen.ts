@@ -36,6 +36,8 @@ import type {
   SessionGetResponses,
   SessionUpdateData,
   SessionUpdateResponses,
+  SessionTodoData,
+  SessionTodoResponses,
   SessionChildrenData,
   SessionChildrenResponses,
   SessionInitData,
@@ -225,8 +227,14 @@ class Tool extends _HeyApiClient {
   /**
    * Register a new HTTP callback tool
    */
-  public register<ThrowOnError extends boolean = false>(options?: Options<ToolRegisterData, ThrowOnError>) {
-    return (options?.client ?? this._client).post<ToolRegisterResponses, ToolRegisterErrors, ThrowOnError>({
+  public register<ThrowOnError extends boolean = false>(
+    options?: Options<ToolRegisterData, ThrowOnError>,
+  ) {
+    return (options?.client ?? this._client).post<
+      ToolRegisterResponses,
+      ToolRegisterErrors,
+      ThrowOnError
+    >({
       url: "/experimental/tool/register",
       ...options,
       headers: {
@@ -239,8 +247,14 @@ class Tool extends _HeyApiClient {
   /**
    * List all tool IDs (including built-in and dynamically registered)
    */
-  public ids<ThrowOnError extends boolean = false>(options?: Options<ToolIdsData, ThrowOnError>) {
-    return (options?.client ?? this._client).get<ToolIdsResponses, ToolIdsErrors, ThrowOnError>({
+  public ids<ThrowOnError extends boolean = false>(
+    options?: Options<ToolIdsData, ThrowOnError>,
+  ) {
+    return (options?.client ?? this._client).get<
+      ToolIdsResponses,
+      ToolIdsErrors,
+      ThrowOnError
+    >({
       url: "/experimental/tool/ids",
       ...options,
     })
@@ -249,8 +263,14 @@ class Tool extends _HeyApiClient {
   /**
    * List tools with JSON schema parameters for a provider/model
    */
-  public list<ThrowOnError extends boolean = false>(options: Options<ToolListData, ThrowOnError>) {
-    return (options.client ?? this._client).get<ToolListResponses, ToolListErrors, ThrowOnError>({
+  public list<ThrowOnError extends boolean = false>(
+    options: Options<ToolListData, ThrowOnError>,
+  ) {
+    return (options.client ?? this._client).get<
+      ToolListResponses,
+      ToolListErrors,
+      ThrowOnError
+    >({
       url: "/experimental/tool",
       ...options,
     })
@@ -361,6 +381,22 @@ class Session extends _HeyApiClient {
         "Content-Type": "application/json",
         ...options.headers,
       },
+    })
+  }
+
+  /**
+   * Get a session's todo list
+   */
+  public todo<ThrowOnError extends boolean = false>(
+    options: Options<SessionTodoData, ThrowOnError>,
+  ) {
+    return (options.client ?? this._client).get<
+      SessionTodoResponses,
+      unknown,
+      ThrowOnError
+    >({
+      url: "/session/{id}/todo",
+      ...options,
     })
   }
 
