@@ -669,6 +669,7 @@ export type Config = {
             context: number
             output: number
           }
+          experimental?: boolean
           options?: {
             [key: string]: unknown
           }
@@ -1036,6 +1037,7 @@ export type Model = {
     context: number
     output: number
   }
+  experimental?: boolean
   options: {
     [key: string]: unknown
   }

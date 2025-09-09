@@ -13,6 +13,9 @@ export namespace Flag {
   export const OPENCODE_DISABLE_LSP_DOWNLOAD = truthy(
     "OPENCODE_DISABLE_LSP_DOWNLOAD",
   )
+  export const OPENCODE_ENABLE_EXPERIMENTAL_MODELS = truthy(
+    "OPENCODE_ENABLE_EXPERIMENTAL_MODELS",
+  )
 
   function truthy(key: string) {
     const value = process.env[key]?.toLowerCase()
