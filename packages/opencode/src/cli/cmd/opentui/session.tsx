@@ -13,7 +13,7 @@ import { useRouteData } from "./context/route"
 import { useSync } from "./context/sync"
 import { SplitBorder } from "./component/border"
 import { Theme } from "./context/theme"
-import { bold, fg } from "@opentui/core"
+import { bold, fg, ScrollBoxRenderable, type TextChunk } from "@opentui/core"
 import { Prompt } from "./component/prompt"
 import type {
   AssistantMessage,
@@ -38,6 +38,8 @@ import type { EditTool } from "../../../tool/edit"
 import type { PatchTool } from "../../../tool/patch"
 import type { WebFetchTool } from "../../../tool/webfetch"
 import type { TaskTool } from "../../../tool/task"
+import { useKeyboard } from "@opentui/solid"
+import { parsePatch } from "diff"
 
 export function Session() {
   const route = useRouteData("session")
@@ -45,9 +47,14 @@ export function Session() {
   const session = createMemo(() => sync.session.get(route.sessionID)!)
   const messages = createMemo(() => sync.data.message[route.sessionID] ?? [])
   const todo = createMemo(() => sync.data.todo[route.sessionID] ?? [])
-  createEffect(() => console.log(todo()))
+  let scroll: ScrollBoxRenderable
 
   createEffect(() => sync.session.sync(route.sessionID))
+
+  useKeyboard((evt) => {
+    if (evt.name === "pageup") scroll.scrollBy(-scroll.height)
+    if (evt.name === "pagedown") scroll.scrollBy(scroll.height)
+  })
 
   return (
     <box
@@ -82,6 +89,7 @@ export function Session() {
           </box>
         </box>
         <scrollbox
+          ref={(r: any) => (scroll = r)}
           scrollbarOptions={{ visible: false }}
           paddingTop={1}
           paddingBottom={1}
@@ -413,11 +421,52 @@ ToolRegistry.register<typeof EditTool>({
   name: "edit",
   pending: () => "Preparing edit...",
   ready(props) {
+    const diffContent = createMemo(() => {
+      const parsed = props.metadata?.diff ? parsePatch(props.metadata.diff) : []
+      const left: TextChunk[] = []
+      const right: TextChunk[] = []
+
+      for (const change of parsed) {
+        for (const hunk of change.hunks) {
+          for (const line of hunk.lines) {
+            const prefix = line[0]
+            const rest = line.slice(1)
+            switch (prefix) {
+              case " ":
+                left.push(fg(Theme.textMuted)(rest))
+                right.push(fg(Theme.textMuted)(rest))
+                break
+              case "+":
+                right.push(fg(Theme.diffAdded)(rest))
+                break
+              case "-":
+                left.push(fg(Theme.diffRemoved)(rest))
+                break
+            }
+          }
+        }
+      }
+
+      return {
+        left,
+        right
+      }
+    })
+
     return (
       <>
-        <text fg={Theme.textMuted}>Edit {(props.input as any).filePath}</text>
-        <box>
-          <text>{props.metadata?.diff || ""}</text>
+        <text fg={Theme.textMuted}>Edit {props.input.filePath}</text>
+        <box flexDirection="row">
+          <box flexGrow={1} flexShrink={0}>
+            <For each={diffContent().left}>
+              {line => <text>{line}</text>}
+            </For>
+          </box>
+          <box flexGrow={1} flexShrink={0}>
+            <For each={diffContent().right}>
+              {line => <text>{line}</text>}
+            </For>
+          </box>
         </box>
       </>
     )
