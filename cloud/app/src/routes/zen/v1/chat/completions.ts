@@ -274,7 +274,8 @@ export async function POST(input: APIEvent) {
       const reasoningCost = MODEL.cost.reasoning * reasoningTokens * 100
       const cacheReadCost = MODEL.cost.cacheRead * cacheReadTokens * 100
       const cacheWriteCost = MODEL.cost.cacheWrite * cacheWriteTokens * 100
-      const totalCostInCent = inputCost + outputCost + reasoningCost + cacheReadCost + cacheWriteCost
+      const totalCostInCent =
+        inputCost + outputCost + reasoningCost + cacheReadCost + cacheWriteCost
 
       logMetric({
         "tokens.input": inputTokens,
@@ -326,10 +327,19 @@ export async function POST(input: APIEvent) {
       "error.message": error.message,
     })
 
-    if (error instanceof AuthError || error instanceof CreditsError || error instanceof ModelError)
-      return new Response(JSON.stringify({ error: { message: error.message } }), { status: 401 })
+    if (
+      error instanceof AuthError ||
+      error instanceof CreditsError ||
+      error instanceof ModelError
+    )
+      return new Response(
+        JSON.stringify({ error: { message: error.message } }),
+        { status: 401 },
+      )
 
-    return new Response(JSON.stringify({ error: { message: error.message } }), { status: 500 })
+    return new Response(JSON.stringify({ error: { message: error.message } }), {
+      status: 500,
+    })
   }
 
   function logMetric(values: Record<string, any>) {
