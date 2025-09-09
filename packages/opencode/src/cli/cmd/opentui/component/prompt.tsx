@@ -74,6 +74,7 @@ export function Prompt(props: PromptProps) {
       <Autocomplete
         ref={(r) => (autocomplete = r)}
         anchor={() => anchor}
+        input={() => input}
         setPrompt={(cb) => {
           setStore(produce(cb))
           input.cursorPosition = store.input.length
@@ -100,17 +101,25 @@ export function Prompt(props: PromptProps) {
           >
             <input
               onInput={(value) => {
-                const diff = value.length - store.input.length
+                let diff = value.length - store.input.length
                 console.log({ diff })
                 setStore(produce((draft) => {
                   draft.input = value
-                  for (const part of draft.parts) {
+                  for (let i = 0; i < draft.parts.length; i++) {
+                    const part = draft.parts[i]
                     if (!part.source) continue
                     if (part.source.text.start >= input.cursorPosition) {
                       part.source.text.start += diff
                       part.source.text.end += diff
                     }
                     const sliced = draft.input.slice(part.source.text.start, part.source.text.end)
+                    console.log(sliced, part.source.text.value)
+                    if (sliced != part.source.text.value && diff < 0) {
+                      diff -= part.source.text.value.length
+                      draft.input = draft.input.slice(0, part.source.text.start) + draft.input.slice(part.source.text.end)
+                      draft.parts.splice(i, 1)
+                      i--
+                    }
                     console.log(sliced)
                   }
                 }))
@@ -239,6 +248,7 @@ function Autocomplete(props: {
   value: string
   setPrompt: (input: (prompt: Prompt) => void) => void
   anchor: () => BoxRenderable
+  input: () => InputRenderable
   ref: (ref: AutocompleteRef) => void
 }) {
   const sdk = useSDK()
@@ -283,10 +293,11 @@ function Autocomplete(props: {
     setStore("selected", next)
   }
 
-  function show(input: string) {
+  function show() {
+    console.log(props.input().cursorPosition)
     setStore({
       visible: true,
-      index: input.length,
+      index: props.input().cursorPosition,
       position: {
         x: props.anchor().x,
         y: props.anchor().y,
@@ -315,7 +326,6 @@ function Autocomplete(props: {
           if (e.name === "return") {
             const file = files()[store.selected]
             if (!file) return
-            console.log("file", file)
             const part: Prompt["parts"][number] = {
               type: "file",
               mime: "text/plain",
@@ -326,7 +336,7 @@ function Autocomplete(props: {
                 text: {
                   start: store.index,
                   end: store.index + file.length + 1,
-                  value: file,
+                  value: "@" + file,
                 },
                 path: file,
               },
@@ -344,15 +354,11 @@ function Autocomplete(props: {
         if (!store.visible && e.name === "@") {
           const last = props.value.at(-1)
           if (last === " " || last === undefined) {
-            show(props.value)
+            show()
           }
         }
       },
     })
-  })
-
-  createEffect(() => {
-    console.log(files())
   })
   return (
     <box
