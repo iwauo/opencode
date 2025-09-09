@@ -4,6 +4,7 @@
   "name": "opencode",
   "type": "module",
   "private": true,
+  "randomField": "xyz123",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "dev": "bun run --conditions=development --conditions=browser ./src/index.ts"

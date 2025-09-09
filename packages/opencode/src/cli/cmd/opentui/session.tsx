@@ -1,31 +1,41 @@
-import { createEffect, createMemo, For, Match, Show, Switch } from "solid-js"
+import {
+  createEffect,
+  createMemo,
+  For,
+  Match,
+  Show,
+  Switch,
+  type Component,
+} from "solid-js"
+import { Dynamic } from "solid-js/web"
+import path from "path"
 import { useRouteData } from "./context/route"
 import { useSync } from "./context/sync"
 import { SplitBorder } from "./component/border"
 import { Theme } from "./context/theme"
-import { bold, fg, ScrollBoxRenderable, SyntaxStyle } from "@opentui/core"
+import { bold, fg } from "@opentui/core"
 import { Prompt } from "./component/prompt"
 import type {
   AssistantMessage,
   Part,
   ToolPart,
+  ToolStatePending,
   UserMessage,
 } from "@opencode-ai/sdk"
 import type { TextPart } from "ai"
 import { useLocal } from "./context/local"
 import { Locale } from "../../../util/locale"
-import { RGBA, hastToStyledText } from "@opentui/core"
-import highlight from "tree-sitter-highlight"
 import type { Tool } from "../../../tool/tool"
 
 import type { ReadTool } from "../../../tool/read"
 import type { WriteTool } from "../../../tool/write"
 import { BashTool } from "../../../tool/bash"
+import type { GlobTool } from "../../../tool/glob"
+import { Instance } from "../../../project/instance"
 
 export function Session() {
   const route = useRouteData("session")
   const sync = useSync()
-  let scroll: ScrollBoxRenderable
   const session = createMemo(() => sync.session.get(route.sessionID)!)
   const messages = createMemo(() => sync.data.message[route.sessionID] ?? [])
   const todo = createMemo(() => sync.data.todo[route.sessionID] ?? [])
@@ -66,9 +76,6 @@ export function Session() {
           </box>
         </box>
         <scrollbox
-          ref={(r: any) => {
-            scroll = r
-          }}
           scrollbarOptions={{ visible: false }}
           paddingTop={1}
           paddingBottom={1}
@@ -153,25 +160,28 @@ function UserMessage(props: { message: UserMessage; parts: Part[] }) {
 
 function AssistantMessage(props: { message: AssistantMessage; parts: Part[] }) {
   return (
-    <For
-      each={props.parts.filter(
-        (x) => !["step-start", "step-finish"].includes(x.type),
-      )}
-    >
-      {(part) => (
-        <box id={part.id}>
-          <Switch>
-            <Match when={part.type === "text"}>
-              <TextPart part={part as TextPart} message={props.message} />
-            </Match>
-            <Match when={part.type === "tool"}>
-              <ToolPart part={part as ToolPart} message={props.message} />
-            </Match>
-          </Switch>
-        </box>
-      )}
+    <For each={props.parts}>
+      {(part) => {
+        const component = createMemo(
+          () => PART_MAPPING[part.type as keyof typeof PART_MAPPING],
+        )
+        return (
+          <Show when={component()}>
+            <Dynamic
+              component={component()}
+              part={part as any}
+              message={props.message}
+            />
+          </Show>
+        )
+      }}
     </For>
   )
+}
+
+const PART_MAPPING = {
+  text: TextPart,
+  tool: ToolPart,
 }
 
 function TextPart(props: { part: TextPart; message: AssistantMessage }) {
@@ -210,6 +220,7 @@ const PendingCopy: Record<string, string> = {
 }
 
 function ToolPart(props: { part: ToolPart; message: AssistantMessage }) {
+  props.part.state.status
   const toolProps = createMemo(
     (): ToolProps<any> => ({
       input: "input" in props.part.state ? props.part.state.input : ({} as any),
@@ -222,199 +233,217 @@ function ToolPart(props: { part: ToolPart; message: AssistantMessage }) {
     }),
   )
 
+  const component = createMemo(() => {
+    if (props.part.state.status === "pending") {
+      const pending = ToolRegistry.pending(props.part.tool)
+      if (!pending) return
+      return pending({})
+    }
+
+    const ready = ToolRegistry.ready(props.part.tool)
+    if (!ready) return
+    return ready({
+      input: props.part.state.input,
+      metadata: props.part.state.metadata,
+      output: props.part.state.status === "completed" ? props.part.state.output : undefined,
+    })
+  })
+
   return (
-    <box {...SplitBorder} borderColor={Theme.backgroundPanel}>
-      <box
-        paddingTop={1}
-        paddingBottom={1}
-        paddingLeft={2}
-        backgroundColor={Theme.backgroundPanel}
-        gap={1}
-      >
-        <Switch>
-          <Match when={props.part.state.status === "pending"}>
-            {PendingCopy[props.part.tool] ?? PendingCopy["default"]}
-          </Match>
-          <Match when={true}>
-            <Switch>
-              <Match when={props.part.tool === "bash"}>
-                <BashToolPart {...(toolProps() as any)} />
-              </Match>
-              <Match when={props.part.tool === "read"}>
-                <ReadToolPart {...(toolProps() as any)} />
-              </Match>
-              <Match when={props.part.tool === "write"}>
-                <WriteToolPart {...(toolProps() as any)} />
-              </Match>
-              <Match when={props.part.tool === "glob"}>
-                <GlobToolPart {...(toolProps() as any)} />
-              </Match>
-              <Match when={props.part.tool === "grep"}>
-                <GrepToolPart {...(toolProps() as any)} />
-              </Match>
-              <Match when={props.part.tool === "list"}>
-                <ListToolPart {...(toolProps() as any)} />
-              </Match>
-              <Match when={props.part.tool === "task"}>
-                <TaskToolPart {...(toolProps() as any)} />
-              </Match>
-              <Match when={props.part.tool === "webfetch"}>
-                <WebFetchToolPart {...(toolProps() as any)} />
-              </Match>
-              <Match when={props.part.tool === "edit"}>
-                <EditToolPart {...(toolProps() as any)} />
-              </Match>
-              <Match when={props.part.tool === "patch"}>
-                <PatchToolPart {...(toolProps() as any)} />
-              </Match>
-            </Switch>
-          </Match>
-        </Switch>
+    <Show when={component()}>
+      <box {...SplitBorder} borderColor={Theme.backgroundPanel}>
+        <box
+          paddingTop={1}
+          paddingBottom={1}
+          paddingLeft={2}
+          backgroundColor={Theme.backgroundPanel}
+          gap={1}
+        >
+          {component()}
+        </box>
       </box>
-    </box>
+    </Show>
   )
 }
 
 type ToolProps<T extends Tool.Info> = {
   input: Tool.InferParameters<T>
-  metadata: Tool.InferMetadata<T>
+  metadata?: Tool.InferMetadata<T>
   output?: string
 }
 
-function BashToolPart(props: ToolProps<typeof BashTool>) {
-  return (
-    <>
-      <text fg={Theme.textMuted}>Shell {props.input["description"]}</text>
-      <box>
-        <text>$ {props.input["command"]}</text>
-        <text>{props.output?.trim()}</text>
-      </box>
-    </>
-  )
-}
+const ToolRegistry = (() => {
+  const state: Record<string, ReturnType<typeof register>> = {}
+  function register<T extends Tool.Info>(input: {
+    name: string
+    pending?: Component
+    ready?: Component<ToolProps<T>>
+  }) {
+    state[input.name] = input
+    return input
+  }
+  return {
+    register,
+    pending(name: string) {
+      return state[name]?.pending
+    },
+    ready(name: string) {
+      return state[name]?.ready
+    },
+  }
+})()
 
-const syntax = new SyntaxStyle({
-  keyword: { fg: RGBA.fromHex(Theme.syntaxKeyword), bold: true },
-  string: { fg: RGBA.fromHex(Theme.syntaxString) },
-  comment: { fg: RGBA.fromHex(Theme.syntaxComment), italic: true },
-  number: { fg: RGBA.fromHex(Theme.syntaxNumber) },
-  function: { fg: RGBA.fromHex(Theme.syntaxFunction) },
-  type: { fg: RGBA.fromHex(Theme.syntaxType) },
-  operator: { fg: RGBA.fromHex(Theme.syntaxOperator) },
-  variable: { fg: RGBA.fromHex(Theme.syntaxVariable) },
-  bracket: { fg: RGBA.fromHex(Theme.syntaxPunctuation) },
-  punctuation: { fg: RGBA.fromHex(Theme.syntaxPunctuation) },
-  default: { fg: RGBA.fromHex(Theme.syntaxVariable) },
+ToolRegistry.register<typeof BashTool>({
+  name: "bash",
+  pending() {
+    return "Pending..."
+  },
+  ready(props) {
+    return (
+      <>
+        <text fg={Theme.textMuted}>Shell {props.input["description"]}</text>
+        <box>
+          <text>$ {props.input["command"]}</text>
+          <text>{props.output?.trim()}</text>
+        </box>
+      </>
+    )
+  },
 })
 
-function ReadToolPart(props: ToolProps<typeof ReadTool>) {
-  const hast = createMemo(() => {
-    const text = props.metadata.preview
-      ? highlight.highlightHast(props.metadata.preview, highlight.Language.TS)
-      : ""
-    const styled = hastToStyledText(text as any, syntax)
-    return styled
-  })
-  return (
-    <>
-      <text fg={Theme.textMuted}>Read {props.input["filePath"]}</text>
-      <box>
-        <text>{hast()}</text>
-      </box>
-    </>
-  )
-}
+ToolRegistry.register<typeof ReadTool>({
+  name: "read",
+  ready(props) {
+    return (
+      <>
+        <text fg={Theme.textMuted}>Read {props.input["filePath"]}</text>
+        <box>
+          <text>{props.metadata?.preview || ""}</text>
+        </box>
+      </>
+    )
+  },
+})
 
-function WriteToolPart(props: ToolProps<typeof WriteTool>) {
-  const hast = createMemo(() =>
-    props.input.content
-      ? highlight.highlightHast(props.input.content, highlight.Language.TS)
-      : "",
-  )
-  return (
-    <>
-      <text fg={Theme.textMuted}>Wrote {props.input.filePath}</text>
-      <box>
-        <text>{hastToStyledText(hast() as any, syntax)}</text>
-      </box>
-    </>
-  )
-}
+ToolRegistry.register<typeof WriteTool>({
+  name: "write",
+  ready(props) {
+    return (
+      <>
+        <text fg={Theme.textMuted}>Wrote {props.input.filePath}</text>
+        <box>
+          <text>{props.input.content || ""}</text>
+        </box>
+      </>
+    )
+  },
+})
 
-function GlobToolPart(props: ToolProps<Tool.Info>) {
-  return (
-    <>
-      <text fg={Theme.textMuted}>Glob {(props.input as any).pattern}</text>
-      <box>
-        <text>{props.output?.trim()}</text>
-      </box>
-    </>
-  )
-}
+ToolRegistry.register<typeof GlobTool>({
+  name: "glob",
+  ready(props) {
+    const files = createMemo(() => {
+      const result = props.output?.split("\n").filter((x) => x) ?? []
+      return result
+        .map((file) => path.relative(Instance.directory, file))
+        .join("\n")
+    })
+    return (
+      <>
+        <text fg={Theme.textMuted}>Glob {(props.input as any).pattern}</text>
+        <box>
+          <text>{files()}</text>
+        </box>
+      </>
+    )
+  },
+})
 
-function GrepToolPart(props: ToolProps<Tool.Info>) {
-  return (
-    <>
-      <text fg={Theme.textMuted}>Grep {(props.input as any).pattern}</text>
-      <box>
-        <text>{props.output?.trim()}</text>
-      </box>
-    </>
-  )
-}
+ToolRegistry.register<Tool.Info>({
+  name: "grep",
+  ready(props) {
+    return (
+      <>
+        <text fg={Theme.textMuted}>Grep {(props.input as any).pattern}</text>
+        <box>
+          <text>{props.output?.trim()}</text>
+        </box>
+      </>
+    )
+  },
+})
 
-function ListToolPart(props: ToolProps<Tool.Info>) {
-  return (
-    <>
-      <text fg={Theme.textMuted}>List {(props.input as any).path || "."}</text>
-      <box>
-        <text>{props.output?.trim()}</text>
-      </box>
-    </>
-  )
-}
+ToolRegistry.register<Tool.Info>({
+  name: "list",
+  ready(props) {
+    return (
+      <>
+        <text fg={Theme.textMuted}>
+          List {(props.input as any).path || "."}
+        </text>
+        <box>
+          <text>{props.output?.trim()}</text>
+        </box>
+      </>
+    )
+  },
+})
 
-function TaskToolPart(props: ToolProps<Tool.Info>) {
-  return (
-    <>
-      <text fg={Theme.textMuted}>Task {(props.input as any).description}</text>
-      <box>
-        <text>{props.output?.trim()}</text>
-      </box>
-    </>
-  )
-}
+ToolRegistry.register<Tool.Info>({
+  name: "task",
+  ready(props) {
+    return (
+      <>
+        <text fg={Theme.textMuted}>
+          Task {(props.input as any).description}
+        </text>
+        <box>
+          <text>{props.output?.trim()}</text>
+        </box>
+      </>
+    )
+  },
+})
 
-function WebFetchToolPart(props: ToolProps<Tool.Info>) {
-  return (
-    <>
-      <text fg={Theme.textMuted}>WebFetch {(props.input as any).url}</text>
-      <box>
-        <text>{props.output?.trim()}</text>
-      </box>
-    </>
-  )
-}
+ToolRegistry.register<Tool.Info>({
+  name: "webfetch",
+  ready(props) {
+    return (
+      <>
+        <text fg={Theme.textMuted}>WebFetch {(props.input as any).url}</text>
+        <box>
+          <text>{props.output?.trim()}</text>
+        </box>
+      </>
+    )
+  },
+})
 
-function EditToolPart(props: ToolProps<Tool.Info>) {
-  return (
-    <>
-      <text fg={Theme.textMuted}>Edit {(props.input as any).filePath}</text>
-      <box>
-        <text>{(props.metadata as any).diff}</text>
-        <text>{props.output?.trim()}</text>
-      </box>
-    </>
-  )
-}
+ToolRegistry.register<Tool.Info>({
+  name: "edit",
+  ready(props) {
+    return (
+      <>
+        <text fg={Theme.textMuted}>Edit {(props.input as any).filePath}</text>
+        <box>
+          <text>{(props.metadata as any)?.diff || ""}</text>
+          <text>{props.output?.trim()}</text>
+        </box>
+      </>
+    )
+  },
+})
 
-function PatchToolPart(props: ToolProps<Tool.Info>) {
-  return (
-    <>
-      <text fg={Theme.textMuted}>Patch</text>
-      <box>
-        <text>{props.output?.trim()}</text>
-      </box>
-    </>
-  )
-}
+ToolRegistry.register<Tool.Info>({
+  name: "patch",
+  ready(props) {
+    return (
+      <>
+        <text fg={Theme.textMuted}>Patch</text>
+        <box>
+          <text>{props.output?.trim()}</text>
+        </box>
+      </>
+    )
+  },
+})
