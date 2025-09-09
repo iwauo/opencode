@@ -19,7 +19,6 @@ import type {
   AssistantMessage,
   Part,
   ToolPart,
-  ToolStatePending,
   UserMessage,
 } from "@opencode-ai/sdk"
 import type { TextPart } from "ai"
@@ -32,6 +31,13 @@ import type { WriteTool } from "../../../tool/write"
 import { BashTool } from "../../../tool/bash"
 import type { GlobTool } from "../../../tool/glob"
 import { Instance } from "../../../project/instance"
+import { TodoWriteTool } from "../../../tool/todo"
+import type { GrepTool } from "../../../tool/grep"
+import type { ListTool } from "../../../tool/ls"
+import type { EditTool } from "../../../tool/edit"
+import type { PatchTool } from "../../../tool/patch"
+import type { WebFetchTool } from "../../../tool/webfetch"
+import type { TaskTool } from "../../../tool/task"
 
 export function Session() {
   const route = useRouteData("session")
@@ -204,34 +210,10 @@ function TextPart(props: { part: TextPart; message: AssistantMessage }) {
   )
 }
 
-const PendingCopy: Record<string, string> = {
-  task: "Delegating...",
-  bash: "Writing command...",
-  edit: "Preparing edit...",
-  webfetch: "Fetching from the web...",
-  glob: "Finding files...",
-  grep: "Searching content...",
-  list: "Listing directory...",
-  read: "Reading file...",
-  write: "Preparing write...",
-  todowrite: "Planning...",
-  patch: "Preparing patch...",
-  default: "Working...",
-}
+// Pending messages moved to individual tool pending functions
 
 function ToolPart(props: { part: ToolPart; message: AssistantMessage }) {
   props.part.state.status
-  const toolProps = createMemo(
-    (): ToolProps<any> => ({
-      input: "input" in props.part.state ? props.part.state.input : ({} as any),
-      metadata:
-        "metadata" in props.part.state
-          ? props.part.state.metadata
-          : ({} as any),
-      output:
-        "output" in props.part.state ? props.part.state.output : undefined,
-    }),
-  )
 
   const component = createMemo(() => {
     if (props.part.state.status === "pending") {
@@ -245,7 +227,10 @@ function ToolPart(props: { part: ToolPart; message: AssistantMessage }) {
     return ready({
       input: props.part.state.input,
       metadata: props.part.state.metadata,
-      output: props.part.state.status === "completed" ? props.part.state.output : undefined,
+      output:
+        props.part.state.status === "completed"
+          ? props.part.state.output
+          : undefined,
     })
   })
 
@@ -295,9 +280,7 @@ const ToolRegistry = (() => {
 
 ToolRegistry.register<typeof BashTool>({
   name: "bash",
-  pending() {
-    return "Pending..."
-  },
+  pending: () => "Writing command...",
   ready(props) {
     return (
       <>
@@ -313,6 +296,7 @@ ToolRegistry.register<typeof BashTool>({
 
 ToolRegistry.register<typeof ReadTool>({
   name: "read",
+  pending: () => "Reading file...",
   ready(props) {
     return (
       <>
@@ -327,6 +311,7 @@ ToolRegistry.register<typeof ReadTool>({
 
 ToolRegistry.register<typeof WriteTool>({
   name: "write",
+  pending: () => "Preparing write...",
   ready(props) {
     return (
       <>
@@ -341,6 +326,7 @@ ToolRegistry.register<typeof WriteTool>({
 
 ToolRegistry.register<typeof GlobTool>({
   name: "glob",
+  pending: () => "Finding files...",
   ready(props) {
     const files = createMemo(() => {
       const result = props.output?.split("\n").filter((x) => x) ?? []
@@ -359,8 +345,9 @@ ToolRegistry.register<typeof GlobTool>({
   },
 })
 
-ToolRegistry.register<Tool.Info>({
+ToolRegistry.register<typeof GrepTool>({
   name: "grep",
+  pending: () => "Searching content...",
   ready(props) {
     return (
       <>
@@ -373,8 +360,9 @@ ToolRegistry.register<Tool.Info>({
   },
 })
 
-ToolRegistry.register<Tool.Info>({
+ToolRegistry.register<typeof ListTool>({
   name: "list",
+  pending: () => "Listing directory...",
   ready(props) {
     return (
       <>
@@ -389,8 +377,9 @@ ToolRegistry.register<Tool.Info>({
   },
 })
 
-ToolRegistry.register<Tool.Info>({
+ToolRegistry.register<typeof TaskTool>({
   name: "task",
+  pending: () => "Delegating...",
   ready(props) {
     return (
       <>
@@ -405,8 +394,9 @@ ToolRegistry.register<Tool.Info>({
   },
 })
 
-ToolRegistry.register<Tool.Info>({
+ToolRegistry.register<typeof WebFetchTool>({
   name: "webfetch",
+  pending: () => "Fetching from the web...",
   ready(props) {
     return (
       <>
@@ -419,23 +409,24 @@ ToolRegistry.register<Tool.Info>({
   },
 })
 
-ToolRegistry.register<Tool.Info>({
+ToolRegistry.register<typeof EditTool>({
   name: "edit",
+  pending: () => "Preparing edit...",
   ready(props) {
     return (
       <>
         <text fg={Theme.textMuted}>Edit {(props.input as any).filePath}</text>
         <box>
-          <text>{(props.metadata as any)?.diff || ""}</text>
-          <text>{props.output?.trim()}</text>
+          <text>{props.metadata?.diff || ""}</text>
         </box>
       </>
     )
   },
 })
 
-ToolRegistry.register<Tool.Info>({
+ToolRegistry.register<typeof PatchTool>({
   name: "patch",
+  pending: () => "Preparing patch...",
   ready(props) {
     return (
       <>
@@ -446,4 +437,9 @@ ToolRegistry.register<Tool.Info>({
       </>
     )
   },
+})
+
+ToolRegistry.register<typeof TodoWriteTool>({
+  name: "todowrite",
+  pending: () => "Planning...",
 })
