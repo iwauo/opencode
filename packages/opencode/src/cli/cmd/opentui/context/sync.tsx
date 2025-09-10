@@ -55,9 +55,13 @@ function init() {
             setStore("message", event.properties.info.sessionID, result.index, reconcile(event.properties.info))
             break
           }
-          setStore("message", event.properties.info.sessionID, produce((draft) => {
-            draft.splice(result.index, 0, event.properties.info)
-          }))
+          setStore(
+            "message",
+            event.properties.info.sessionID,
+            produce((draft) => {
+              draft.splice(result.index, 0, event.properties.info)
+            }),
+          )
           break
         }
         case "message.part.updated": {
@@ -71,9 +75,13 @@ function init() {
             setStore("part", event.properties.part.messageID, result.index, reconcile(event.properties.part))
             break
           }
-          setStore("part", event.properties.part.messageID, produce((draft) => {
-            draft.splice(result.index, 0, event.properties.part)
-          }))
+          setStore(
+            "part",
+            event.properties.part.messageID,
+            produce((draft) => {
+              draft.splice(result.index, 0, event.properties.part)
+            }),
+          )
           break
         }
       }
