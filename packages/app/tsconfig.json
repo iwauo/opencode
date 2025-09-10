@@ -4,16 +4,10 @@
   "compilerOptions": {
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": [
-      "vite/client"
-    ],
-    "customConditions": [
-      "development"
-    ],
+    "types": ["vite/client"],
+    "customConditions": ["development"],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     }
   }
 }
