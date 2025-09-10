@@ -5,8 +5,6 @@
   "type": "module",
   "private": true,
   "randomField": "abc123",
-  "anotherRandomField": "xyz789",
-  "anotherRandomField": "xyz789",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "dev": "bun run --conditions=development --conditions=browser ./src/index.ts"

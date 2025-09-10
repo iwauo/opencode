@@ -449,7 +449,7 @@ ToolRegistry.register<typeof EditTool>({
 
       return {
         left,
-        right
+        right,
       }
     })
 
@@ -458,13 +458,11 @@ ToolRegistry.register<typeof EditTool>({
         <text fg={Theme.textMuted}>Edit {props.input.filePath}</text>
         <box flexDirection="row">
           <box flexGrow={1} flexShrink={0}>
-            <For each={diffContent().left}>
-              {line => <text>{line}</text>}
-            </For>
+            <For each={diffContent().left}>{(line) => <text>{line}</text>}</For>
           </box>
           <box flexGrow={1} flexShrink={0}>
             <For each={diffContent().right}>
-              {line => <text>{line}</text>}
+              {(line) => <text>{line}</text>}
             </For>
           </box>
         </box>
