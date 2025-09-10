@@ -21,9 +21,7 @@ export const DebugCommand = cmd({
         command: "wait",
         async handler() {
           await bootstrap(process.cwd(), async () => {
-            await new Promise((resolve) =>
-              setTimeout(resolve, 1_000 * 60 * 60 * 24),
-            )
+            await new Promise((resolve) => setTimeout(resolve, 1_000 * 60 * 60 * 24))
           })
         },
       })

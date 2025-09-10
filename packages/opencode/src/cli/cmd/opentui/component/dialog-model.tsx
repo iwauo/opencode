@@ -40,9 +40,7 @@ export function DialogModel() {
             description: provider.name,
             category: provider.name,
           })),
-          filter(
-            (x) => !local.model.recent().find((y) => isDeepEqual(y, x.value)),
-          ),
+          filter((x) => !local.model.recent().find((y) => isDeepEqual(y, x.value))),
         ),
       ),
     ),

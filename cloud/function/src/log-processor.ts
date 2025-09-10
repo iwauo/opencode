@@ -21,9 +21,7 @@ export default {
         "cf.longitude": event.event.request.cf?.longitude,
         "cf.timezone": event.event.request.cf?.timezone,
         duration: event.wallTime,
-        request_length: parseInt(
-          event.event.request.headers["content-length"] ?? "0",
-        ),
+        request_length: parseInt(event.event.request.headers["content-length"] ?? "0"),
         status: event.event.response?.status ?? 0,
         ip: event.event.request.headers["x-real-ip"],
       }
@@ -39,9 +37,7 @@ export default {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-Honeycomb-Event-Time": (
-            event.eventTimestamp ?? Date.now()
-          ).toString(),
+          "X-Honeycomb-Event-Time": (event.eventTimestamp ?? Date.now()).toString(),
           "X-Honeycomb-Team": Resource.HONEYCOMB_API_KEY.value,
         },
         body: JSON.stringify(metrics),

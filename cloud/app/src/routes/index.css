@@ -207,8 +207,7 @@
 
   [data-component="method"] {
     display: flex;
-    padding: calc(var(--vertical-padding) / 2) calc(var(--padding) / 2)
-      calc(var(--vertical-padding) / 2 + 0.125rem);
+    padding: calc(var(--vertical-padding) / 2) calc(var(--padding) / 2) calc(var(--vertical-padding) / 2 + 0.125rem);
     flex-direction: column;
     text-align: left;
     gap: var(--space-2-5);

@@ -6,11 +6,7 @@ export namespace State {
 
   const entries = new Map<string, Map<any, Entry>>()
 
-  export function create<S>(
-    root: () => string,
-    init: () => S,
-    dispose?: (state: Awaited<S>) => Promise<void>,
-  ) {
+  export function create<S>(root: () => string, init: () => S, dispose?: (state: Awaited<S>) => Promise<void>) {
     return () => {
       const key = root()
       let collection = entries.get(key)

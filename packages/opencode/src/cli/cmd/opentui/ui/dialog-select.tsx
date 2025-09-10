@@ -1,9 +1,4 @@
-import {
-  InputRenderable,
-  RGBA,
-  ScrollBoxRenderable,
-  TextAttributes,
-} from "@opentui/core"
+import { InputRenderable, RGBA, ScrollBoxRenderable, TextAttributes } from "@opentui/core"
 import { Theme } from "../context/theme"
 import { entries, flatMap, groupBy, pipe } from "remeda"
 import { batch, createEffect, createMemo, For, Show } from "solid-js"
@@ -40,12 +35,7 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
     const needle = store.filter.toLowerCase()
     const result = pipe(
       props.options,
-      (x) =>
-        !needle
-          ? x
-          : fuzzysort
-              .go(needle, x, { keys: ["title", "category"] })
-              .map((x) => x.obj),
+      (x) => (!needle ? x : fuzzysort.go(needle, x, { keys: ["title", "category"] }).map((x) => x.obj)),
       groupBy((x) => x.category ?? ""),
       // mapValues((x) => x.sort((a, b) => a.title.localeCompare(b.title))),
       entries(),
@@ -147,11 +137,7 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
                     <Option
                       id={JSON.stringify(option.value)}
                       title={option.title}
-                      description={
-                        option.description !== category
-                          ? option.description
-                          : undefined
-                      }
+                      description={option.description !== category ? option.description : undefined}
                       active={isDeepEqual(option.value, selected()?.value)}
                       current={isDeepEqual(option.value, props.current)}
                     />
@@ -162,12 +148,7 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
           )}
         </For>
       </scrollbox>
-      <box
-        paddingRight={2}
-        paddingLeft={3}
-        paddingBottom={1}
-        flexDirection="row"
-      >
+      <box paddingRight={2} paddingLeft={3} paddingBottom={1} flexDirection="row">
         <text fg={Theme.text} attributes={TextAttributes.BOLD}>
           n
         </text>
@@ -181,13 +162,7 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
   )
 }
 
-function Option(props: {
-  id: string
-  title: string
-  description?: string
-  active?: boolean
-  current?: boolean
-}) {
+function Option(props: { id: string; title: string; description?: string; active?: boolean; current?: boolean }) {
   return (
     <box
       id={props.id}
@@ -197,21 +172,12 @@ function Option(props: {
       paddingRight={1}
     >
       <text
-        fg={
-          props.active
-            ? Theme.background
-            : props.current
-              ? Theme.primary
-              : Theme.text
-        }
+        fg={props.active ? Theme.background : props.current ? Theme.primary : Theme.text}
         attributes={props.active ? TextAttributes.BOLD : undefined}
       >
         {props.title}
       </text>
-      <text fg={props.active ? Theme.background : Theme.textMuted}>
-        {" "}
-        {props.description}
-      </text>
+      <text fg={props.active ? Theme.background : Theme.textMuted}> {props.description}</text>
     </box>
   )
 }

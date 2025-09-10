@@ -55,8 +55,7 @@ for (const [os, arch] of targets) {
   // Run the binary only if it matches current OS/arch
   if (
     process.platform === (os === "windows" ? "win32" : os) &&
-    (process.arch === arch ||
-      (process.arch === "x64" && arch === "x64-baseline"))
+    (process.arch === arch || (process.arch === "x64" && arch === "x64-baseline"))
   ) {
     console.log(`smoke test: running dist/${name}/bin/opencode --version`)
     await $`./dist/${name}/bin/opencode --version`
@@ -74,8 +73,7 @@ for (const [os, arch] of targets) {
       2,
     ),
   )
-  if (!dry)
-    await $`cd dist/${name} && chmod 777 -R . && bun publish --access public --tag ${npmTag}`
+  if (!dry) await $`cd dist/${name} && chmod 777 -R . && bun publish --access public --tag ${npmTag}`
   optionalDependencies[name] = version
 }
 
@@ -101,8 +99,7 @@ await Bun.file(`./dist/${pkg.name}/package.json`).write(
     2,
   ),
 )
-if (!dry)
-  await $`cd ./dist/${pkg.name} && bun publish --access public --tag ${npmTag}`
+if (!dry) await $`cd ./dist/${pkg.name} && bun publish --access public --tag ${npmTag}`
 
 if (!snapshot) {
   for (const key of Object.keys(optionalDependencies)) {
@@ -110,22 +107,10 @@ if (!snapshot) {
   }
 
   // Calculate SHA values
-  const arm64Sha =
-    await $`sha256sum ./dist/opencode-linux-arm64.zip | cut -d' ' -f1`
-      .text()
-      .then((x) => x.trim())
-  const x64Sha =
-    await $`sha256sum ./dist/opencode-linux-x64.zip | cut -d' ' -f1`
-      .text()
-      .then((x) => x.trim())
-  const macX64Sha =
-    await $`sha256sum ./dist/opencode-darwin-x64.zip | cut -d' ' -f1`
-      .text()
-      .then((x) => x.trim())
-  const macArm64Sha =
-    await $`sha256sum ./dist/opencode-darwin-arm64.zip | cut -d' ' -f1`
-      .text()
-      .then((x) => x.trim())
+  const arm64Sha = await $`sha256sum ./dist/opencode-linux-arm64.zip | cut -d' ' -f1`.text().then((x) => x.trim())
+  const x64Sha = await $`sha256sum ./dist/opencode-linux-x64.zip | cut -d' ' -f1`.text().then((x) => x.trim())
+  const macX64Sha = await $`sha256sum ./dist/opencode-darwin-x64.zip | cut -d' ' -f1`.text().then((x) => x.trim())
+  const macArm64Sha = await $`sha256sum ./dist/opencode-darwin-arm64.zip | cut -d' ' -f1`.text().then((x) => x.trim())
 
   const binaryPkgbuild = [
     "# Maintainer: dax",

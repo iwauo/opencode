@@ -109,8 +109,7 @@ export default {
           }).then((x) => x.json())) as any
           email = emails.find((x: any) => x.primary && x.verified)?.email
         } else if (response.provider === "google") {
-          if (!response.id.email_verified)
-            throw new Error("Google email not verified")
+          if (!response.id.email_verified) throw new Error("Google email not verified")
           email = response.id.email as string
         }
         //if (response.provider === "email") {

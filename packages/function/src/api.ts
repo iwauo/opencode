@@ -206,11 +206,7 @@ export default new Hono<{ Bindings: Env }>()
 
     // get Authorization header
     const token = c.req.header("Authorization")?.replace(/^Bearer /, "")
-    if (!token)
-      return c.json(
-        { error: "Authorization header is required" },
-        { status: 401 },
-      )
+    if (!token) return c.json({ error: "Authorization header is required" }, { status: 401 })
 
     // verify token
     const JWKS = createRemoteJWKSet(new URL(JWKS_URL))
@@ -268,11 +264,7 @@ export default new Hono<{ Bindings: Env }>()
       // Verify permissions
       const userClient = new Octokit({ auth: token })
       const { data: repoData } = await userClient.repos.get({ owner, repo })
-      if (
-        !repoData.permissions.admin &&
-        !repoData.permissions.push &&
-        !repoData.permissions.maintain
-      )
+      if (!repoData.permissions.admin && !repoData.permissions.push && !repoData.permissions.maintain)
         throw new Error("User does not have write permissions")
 
       // Get installation token

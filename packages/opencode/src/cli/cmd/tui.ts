@@ -112,12 +112,8 @@ export const TuiCommand = cmd({
         })
 
         let cmd = ["go", "run", "./main.go"]
-        let cwd = Bun.fileURLToPath(
-          new URL("../../../../tui/cmd/opencode", import.meta.url),
-        )
-        const tui = Bun.embeddedFiles.find((item) =>
-          (item as File).name.includes("tui"),
-        ) as File
+        let cwd = Bun.fileURLToPath(new URL("../../../../tui/cmd/opencode", import.meta.url))
+        const tui = Bun.embeddedFiles.find((item) => (item as File).name.includes("tui")) as File
         if (tui) {
           let binaryName = tui.name
           if (process.platform === "win32" && !binaryName.endsWith(".exe")) {
@@ -162,17 +158,14 @@ export const TuiCommand = cmd({
           if (Installation.isDev()) return
           if (Installation.isSnapshot()) return
           const config = await Config.global()
-          if (config.autoupdate === false || Flag.OPENCODE_DISABLE_AUTOUPDATE)
-            return
+          if (config.autoupdate === false || Flag.OPENCODE_DISABLE_AUTOUPDATE) return
           const latest = await Installation.latest().catch(() => {})
           if (!latest) return
           if (Installation.VERSION === latest) return
           const method = await Installation.method()
           if (method === "unknown") return
           await Installation.upgrade(method, latest)
-            .then(() =>
-              Bus.publish(Installation.Event.Updated, { version: latest }),
-            )
+            .then(() => Bus.publish(Installation.Event.Updated, { version: latest }))
             .catch(() => {})
         })()
         ;(async () => {

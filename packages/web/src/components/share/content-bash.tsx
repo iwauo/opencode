@@ -41,10 +41,7 @@ export function ContentBash(props: Props) {
   const overflow = createOverflow()
 
   return (
-    <div
-      class={style.root}
-      data-expanded={expanded() || props.expand === true ? true : undefined}
-    >
+    <div class={style.root} data-expanded={expanded() || props.expand === true ? true : undefined}>
       <div data-slot="body">
         <div data-slot="header">
           <span>{props.description}</span>

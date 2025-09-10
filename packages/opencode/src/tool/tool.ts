@@ -14,10 +14,7 @@ export namespace Tool {
     metadata(input: { title?: string; metadata?: M }): void
   }
 
-  export interface Info<
-    Parameters extends StandardSchemaV1 = StandardSchemaV1,
-    M extends Metadata = Metadata,
-  > {
+  export interface Info<Parameters extends StandardSchemaV1 = StandardSchemaV1, M extends Metadata = Metadata> {
     id: string
     init: () => Promise<{
       description: string
@@ -33,19 +30,12 @@ export namespace Tool {
     }>
   }
 
-  export type InferParameters<T extends Info> =
-    T extends Info<infer P> ? StandardSchemaV1.InferOutput<P> : never
-  export type InferMetadata<T extends Info> =
-    T extends Info<any, infer M> ? M : never
+  export type InferParameters<T extends Info> = T extends Info<infer P> ? StandardSchemaV1.InferOutput<P> : never
+  export type InferMetadata<T extends Info> = T extends Info<any, infer M> ? M : never
 
-  export function define<
-    Parameters extends StandardSchemaV1,
-    Result extends Metadata,
-  >(
+  export function define<Parameters extends StandardSchemaV1, Result extends Metadata>(
     id: string,
-    init:
-      | Info<Parameters, Result>["init"]
-      | Awaited<ReturnType<Info<Parameters, Result>["init"]>>,
+    init: Info<Parameters, Result>["init"] | Awaited<ReturnType<Info<Parameters, Result>["init"]>>,
   ): Info<Parameters, Result> {
     return {
       id,

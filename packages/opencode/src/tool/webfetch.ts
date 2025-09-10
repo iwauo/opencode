@@ -15,20 +15,12 @@ export const WebFetchTool = Tool.define("webfetch", {
     url: z.string().describe("The URL to fetch content from"),
     format: z
       .enum(["text", "markdown", "html"])
-      .describe(
-        "The format to return the content in (text, markdown, or html)",
-      ),
-    timeout: z
-      .number()
-      .describe("Optional timeout in seconds (max 120)")
-      .optional(),
+      .describe("The format to return the content in (text, markdown, or html)"),
+    timeout: z.number().describe("Optional timeout in seconds (max 120)").optional(),
   }),
   async execute(params, ctx) {
     // Validate URL
-    if (
-      !params.url.startsWith("http://") &&
-      !params.url.startsWith("https://")
-    ) {
+    if (!params.url.startsWith("http://") && !params.url.startsWith("https://")) {
       throw new Error("URL must start with http:// or https://")
     }
 
@@ -48,10 +40,7 @@ export const WebFetchTool = Tool.define("webfetch", {
         },
       })
 
-    const timeout = Math.min(
-      (params.timeout ?? DEFAULT_TIMEOUT / 1000) * 1000,
-      MAX_TIMEOUT,
-    )
+    const timeout = Math.min((params.timeout ?? DEFAULT_TIMEOUT / 1000) * 1000, MAX_TIMEOUT)
 
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), timeout)
@@ -61,8 +50,7 @@ export const WebFetchTool = Tool.define("webfetch", {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        Accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.9",
       },
     })
@@ -152,16 +140,7 @@ async function extractTextFromHTML(html: string) {
     .on("*", {
       element(element) {
         // Reset skip flag when entering other elements
-        if (
-          ![
-            "script",
-            "style",
-            "noscript",
-            "iframe",
-            "object",
-            "embed",
-          ].includes(element.tagName)
-        ) {
+        if (!["script", "style", "noscript", "iframe", "object", "embed"].includes(element.tagName)) {
           skipContent = false
         }
       },

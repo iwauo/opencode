@@ -1,10 +1,4 @@
-import {
-  bigint,
-  boolean,
-  int,
-  mysqlTable,
-  varchar,
-} from "drizzle-orm/mysql-core"
+import { bigint, boolean, int, mysqlTable, varchar } from "drizzle-orm/mysql-core"
 import { timestamps, workspaceColumns } from "../drizzle/types"
 import { workspaceIndexes } from "./workspace.sql"
 

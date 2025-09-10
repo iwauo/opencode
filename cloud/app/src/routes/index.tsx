@@ -57,11 +57,7 @@ export default function Home() {
       <Title>opencode | AI coding agent built for the terminal</Title>
       <div data-component="content">
         <section data-component="top">
-          <img
-            data-slot="logo light"
-            src={logoLight}
-            alt="opencode logo light"
-          />
+          <img data-slot="logo light" src={logoLight} alt="opencode logo light" />
           <img data-slot="logo dark" src={logoDark} alt="opencode logo dark" />
           <h1 data-slot="title">The AI coding agent built for the terminal</h1>
         </section>
@@ -86,33 +82,27 @@ export default function Home() {
         <section data-component="features">
           <ul data-slot="list">
             <li>
-              <strong>Native TUI</strong> A responsive, native, themeable
-              terminal UI
+              <strong>Native TUI</strong> A responsive, native, themeable terminal UI
             </li>
             <li>
-              <strong>LSP enabled</strong> Automatically loads the right LSPs
-              for the LLM
+              <strong>LSP enabled</strong> Automatically loads the right LSPs for the LLM
             </li>
             <li>
               <strong>opencode zen</strong> A <a href="/docs/zen">curated list of models</a> provided by opencode{" "}
               <label>New</label>
             </li>
             <li>
-              <strong>Multi-session</strong> Start multiple agents in parallel
-              on the same project
+              <strong>Multi-session</strong> Start multiple agents in parallel on the same project
             </li>
             <li>
-              <strong>Shareable links</strong> Share a link to any sessions for
-              reference or to debug
+              <strong>Shareable links</strong> Share a link to any sessions for reference or to debug
             </li>
             <li>
-              <strong>Claude Pro</strong> Log in with Anthropic to use your
-              Claude Pro or Max account
+              <strong>Claude Pro</strong> Log in with Anthropic to use your Claude Pro or Max account
             </li>
             <li>
               <strong>Use any model</strong> Supports 75+ LLM providers through{" "}
-              <a href="https://models.dev">Models.dev</a>, including local
-              models
+              <a href="https://models.dev">Models.dev</a>, including local models
             </li>
           </ul>
         </section>

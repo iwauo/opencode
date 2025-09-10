@@ -54,13 +54,9 @@ async function fetchNpmDownloads(packageName: string): Promise<number> {
     // Use a range from 2020 to current year + 5 years to ensure it works forever
     const currentYear = new Date().getFullYear()
     const endYear = currentYear + 5
-    const response = await fetch(
-      `https://api.npmjs.org/downloads/range/2020-01-01:${endYear}-12-31/${packageName}`,
-    )
+    const response = await fetch(`https://api.npmjs.org/downloads/range/2020-01-01:${endYear}-12-31/${packageName}`)
     if (!response.ok) {
-      console.warn(
-        `Failed to fetch npm downloads for ${packageName}: ${response.status}`,
-      )
+      console.warn(`Failed to fetch npm downloads for ${packageName}: ${response.status}`)
       return 0
     }
     const data: NpmDownloadsRange = await response.json()
@@ -81,9 +77,7 @@ async function fetchReleases(): Promise<Release[]> {
 
     const response = await fetch(url)
     if (!response.ok) {
-      throw new Error(
-        `GitHub API error: ${response.status} ${response.statusText}`,
-      )
+      throw new Error(`GitHub API error: ${response.status} ${response.statusText}`)
     }
 
     const batch: Release[] = await response.json()
@@ -144,11 +138,7 @@ async function save(githubTotal: number, npmDownloads: number) {
 
     for (let i = lines.length - 1; i >= 0; i--) {
       const line = lines[i].trim()
-      if (
-        line.startsWith("|") &&
-        !line.includes("Date") &&
-        !line.includes("---")
-      ) {
+      if (line.startsWith("|") && !line.includes("Date") && !line.includes("---")) {
         const match = line.match(
           /\|\s*[\d-]+\s*\|\s*([\d,]+)\s*(?:\([^)]*\))?\s*\|\s*([\d,]+)\s*(?:\([^)]*\))?\s*\|\s*([\d,]+)\s*(?:\([^)]*\))?\s*\|/,
         )
@@ -176,11 +166,7 @@ async function save(githubTotal: number, npmDownloads: number) {
         ? ` (${githubChange.toLocaleString()})`
         : " (+0)"
   const npmChangeStr =
-    npmChange > 0
-      ? ` (+${npmChange.toLocaleString()})`
-      : npmChange < 0
-        ? ` (${npmChange.toLocaleString()})`
-        : " (+0)"
+    npmChange > 0 ? ` (+${npmChange.toLocaleString()})` : npmChange < 0 ? ` (${npmChange.toLocaleString()})` : " (+0)"
   const totalChangeStr =
     totalChange > 0
       ? ` (+${totalChange.toLocaleString()})`
@@ -211,9 +197,7 @@ const { total: githubTotal, stats } = calculate(releases)
 
 console.log("Fetching npm all-time downloads for opencode-ai...\n")
 const npmDownloads = await fetchNpmDownloads("opencode-ai")
-console.log(
-  `Fetched npm all-time downloads: ${npmDownloads.toLocaleString()}\n`,
-)
+console.log(`Fetched npm all-time downloads: ${npmDownloads.toLocaleString()}\n`)
 
 await save(githubTotal, npmDownloads)
 
@@ -236,8 +220,6 @@ console.log(`  npm: ${npmDownloads.toLocaleString()}`)
 console.log("=".repeat(60))
 
 console.log("-".repeat(60))
-console.log(
-  `GitHub Total: ${githubTotal.toLocaleString()} downloads across ${releases.length} releases`,
-)
+console.log(`GitHub Total: ${githubTotal.toLocaleString()} downloads across ${releases.length} releases`)
 console.log(`npm Total: ${npmDownloads.toLocaleString()} downloads`)
 console.log(`Combined Total: ${totalDownloads.toLocaleString()} downloads`)

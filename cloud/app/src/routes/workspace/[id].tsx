@@ -82,16 +82,10 @@ const getPaymentsInfo = query(async (workspaceID: string) => {
   }, workspaceID)
 }, "paymentsInfo")
 
-const createCheckoutUrl = action(
-  async (workspaceID: string, successUrl: string, cancelUrl: string) => {
-    "use server"
-    return withActor(
-      () => Billing.generateCheckoutUrl({ successUrl, cancelUrl }),
-      workspaceID,
-    )
-  },
-  "checkoutUrl",
-)
+const createCheckoutUrl = action(async (workspaceID: string, successUrl: string, cancelUrl: string) => {
+  "use server"
+  return withActor(() => Billing.generateCheckoutUrl({ successUrl, cancelUrl }), workspaceID)
+}, "checkoutUrl")
 
 // const createPortalUrl = action(async (workspaceID: string, returnUrl: string) => {
 //   "use server"
@@ -243,37 +237,21 @@ function KeysSection() {
                   <tr>
                     <td data-slot="key-name">{key.name}</td>
                     <td data-slot="key-value">
-                      <div
-                        onClick={() => copyKeyToClipboard(key.key, key.id)}
-                        title="Click to copy API key"
-                      >
+                      <div onClick={() => copyKeyToClipboard(key.key, key.id)} title="Click to copy API key">
                         <span>{formatKey(key.key)}</span>
                         <Show
                           when={copiedId() === key.id}
-                          fallback={
-                            <IconCopy
-                              style={{ width: "14px", height: "14px" }}
-                            />
-                          }
+                          fallback={<IconCopy style={{ width: "14px", height: "14px" }} />}
                         >
-                          <IconCheck
-                            style={{ width: "14px", height: "14px" }}
-                          />
+                          <IconCheck style={{ width: "14px", height: "14px" }} />
                         </Show>
                       </div>
                     </td>
-                    <td
-                      data-slot="key-date"
-                      title={formatDateUTC(key.timeCreated)}
-                    >
+                    <td data-slot="key-date" title={formatDateUTC(key.timeCreated)}>
                       {formatDateForTable(key.timeCreated)}
                     </td>
                     <td data-slot="key-actions">
-                      <button
-                        data-color="ghost"
-                        onClick={() => handleDeleteKey(key.id)}
-                        title="Delete API key"
-                      >
+                      <button data-color="ghost" onClick={() => handleDeleteKey(key.id)} title="Delete API key">
                         Delete
                       </button>
                     </td>
@@ -300,11 +278,7 @@ function BalanceSection() {
   async function handleBuyCredits() {
     try {
       const baseUrl = window.location.href
-      const checkoutUrl = await createCheckoutUrlAction(
-        params.id,
-        baseUrl,
-        baseUrl,
-      )
+      const checkoutUrl = await createCheckoutUrlAction(params.id, baseUrl, baseUrl)
       if (checkoutUrl) {
         window.location.href = checkoutUrl
       }
@@ -323,29 +297,19 @@ function BalanceSection() {
         <div
           data-slot="amount"
           data-state={(() => {
-            const balanceStr = (
-              (balanceInfo()?.balance ?? 0) / 100000000
-            ).toFixed(2)
-            return balanceStr === "0.00" || balanceStr === "-0.00"
-              ? "danger"
-              : undefined
+            const balanceStr = ((balanceInfo()?.balance ?? 0) / 100000000).toFixed(2)
+            return balanceStr === "0.00" || balanceStr === "-0.00" ? "danger" : undefined
           })()}
         >
           <span data-slot="currency">$</span>
           <span data-slot="value">
             {(() => {
-              const balanceStr = (
-                (balanceInfo()?.balance ?? 0) / 100000000
-              ).toFixed(2)
+              const balanceStr = ((balanceInfo()?.balance ?? 0) / 100000000).toFixed(2)
               return balanceStr === "-0.00" ? "0.00" : balanceStr
             })()}
           </span>
         </div>
-        <button
-          data-color="primary"
-          disabled={createCheckoutUrlSubmission.pending}
-          onClick={handleBuyCredits}
-        >
+        <button data-color="primary" disabled={createCheckoutUrlSubmission.pending} onClick={handleBuyCredits}>
           {createCheckoutUrlSubmission.pending ? "Loading..." : "Buy Credits"}
         </button>
       </div>
@@ -429,9 +393,7 @@ function UsageSection() {
                       <td data-slot="usage-model">{usage.model}</td>
                       <td data-slot="usage-tokens">{usage.inputTokens}</td>
                       <td data-slot="usage-tokens">{usage.outputTokens}</td>
-                      <td data-slot="usage-cost">
-                        ${((usage.cost ?? 0) / 100000000).toFixed(4)}
-                      </td>
+                      <td data-slot="usage-cost">${((usage.cost ?? 0) / 100000000).toFixed(4)}</td>
                     </tr>
                   )
                 }}

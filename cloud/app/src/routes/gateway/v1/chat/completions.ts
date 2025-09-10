@@ -5,10 +5,7 @@ import { Resource } from "@opencode/cloud-resource"
 import type { APIEvent } from "@solidjs/start/server"
 import { Database, eq, sql } from "@opencode/cloud-core/drizzle/index.js"
 import { KeyTable } from "@opencode/cloud-core/schema/key.sql.js"
-import {
-  BillingTable,
-  UsageTable,
-} from "@opencode/cloud-core/schema/billing.sql.js"
+import { BillingTable, UsageTable } from "@opencode/cloud-core/schema/billing.sql.js"
 import { centsToMicroCents } from "@opencode/cloud-core/util/price.js"
 import { Identifier } from "@opencode/cloud-core/identifier.js"
 
@@ -75,29 +72,26 @@ export async function POST(input: APIEvent) {
     await checkCredits()
 
     // Request to model provider
-    const res = await fetch(
-      new URL(url.pathname.replace(/^\/gateway/, "") + url.search, MODEL.api),
-      {
-        method: "POST",
-        headers: (() => {
-          const headers = input.request.headers
-          headers.delete("host")
-          headers.delete("content-length")
-          headers.set("authorization", `Bearer ${MODEL.apiKey}`)
-          Object.entries(MODEL.headerMappings ?? {}).forEach(([k, v]) => {
-            headers.set(k, headers.get(v)!)
-          })
-          return headers
-        })(),
-        body: JSON.stringify({
-          ...body,
-          model: MODEL.model,
-          stream_options: {
-            include_usage: true,
-          },
-        }),
-      },
-    )
+    const res = await fetch(new URL(url.pathname.replace(/^\/gateway/, "") + url.search, MODEL.api), {
+      method: "POST",
+      headers: (() => {
+        const headers = input.request.headers
+        headers.delete("host")
+        headers.delete("content-length")
+        headers.set("authorization", `Bearer ${MODEL.apiKey}`)
+        Object.entries(MODEL.headerMappings ?? {}).forEach(([k, v]) => {
+          headers.set(k, headers.get(v)!)
+        })
+        return headers
+      })(),
+      body: JSON.stringify({
+        ...body,
+        model: MODEL.model,
+        stream_options: {
+          include_usage: true,
+        },
+      }),
+    })
 
     // Scrub response headers
     const resHeaders = new Headers()
@@ -179,8 +173,7 @@ export async function POST(input: APIEvent) {
     async function authenticate() {
       try {
         const authHeader = input.request.headers.get("authorization")
-        if (!authHeader || !authHeader.startsWith("Bearer "))
-          throw new AuthError("Missing API key.")
+        if (!authHeader || !authHeader.startsWith("Bearer ")) throw new AuthError("Missing API key.")
 
         const apiKey = authHeader.split(" ")[1]
         const key = await Database.use((tx) =>
@@ -228,8 +221,7 @@ export async function POST(input: APIEvent) {
       const usage = chunk.usage
       const inputTokens = usage.prompt_tokens ?? 0
       const outputTokens = usage.completion_tokens ?? 0
-      const reasoningTokens =
-        usage.completion_tokens_details?.reasoning_tokens ?? 0
+      const reasoningTokens = usage.completion_tokens_details?.reasoning_tokens ?? 0
       const cacheReadTokens = usage.prompt_tokens_details?.cached_tokens ?? 0
       //const cacheWriteTokens = providerMetadata?.["anthropic"]?.["cacheCreationInputTokens"] ?? 0
       const cacheWriteTokens = 0
@@ -239,13 +231,7 @@ export async function POST(input: APIEvent) {
       const reasoningCost = MODEL.cost.reasoning * reasoningTokens
       const cacheReadCost = MODEL.cost.cacheRead * cacheReadTokens
       const cacheWriteCost = MODEL.cost.cacheWrite * cacheWriteTokens
-      const costInCents =
-        (inputCost +
-          outputCost +
-          reasoningCost +
-          cacheReadCost +
-          cacheWriteCost) *
-        100
+      const costInCents = (inputCost + outputCost + reasoningCost + cacheReadCost + cacheWriteCost) * 100
       const cost = centsToMicroCents(costInCents)
 
       await Database.transaction(async (tx) => {
@@ -309,12 +295,9 @@ export async function POST(input: APIEvent) {
     }
 
     if (error instanceof ModelError) {
-      return new Response(
-        JSON.stringify({ error: { message: error.message } }),
-        {
-          status: 401,
-        },
-      )
+      return new Response(JSON.stringify({ error: { message: error.message } }), {
+        status: 401,
+      })
     }
 
     console.log(error)

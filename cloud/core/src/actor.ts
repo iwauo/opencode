@@ -69,8 +69,6 @@ export namespace Actor {
     if ("workspaceID" in actor.properties) {
       return actor.properties.workspaceID
     }
-    throw new Error(
-      `actor of type "${actor.type}" is not associated with a workspace`,
-    )
+    throw new Error(`actor of type "${actor.type}" is not associated with a workspace`)
   }
 }

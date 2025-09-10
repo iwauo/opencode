@@ -28,9 +28,7 @@ export namespace Auth {
     })
     .openapi({ ref: "WellKnownAuth" })
 
-  export const Info = z
-    .discriminatedUnion("type", [Oauth, Api, WellKnown])
-    .openapi({ ref: "Auth" })
+  export const Info = z.discriminatedUnion("type", [Oauth, Api, WellKnown]).openapi({ ref: "Auth" })
   export type Info = z.infer<typeof Info>
 
   const filepath = path.join(Global.Path.data, "auth.json")

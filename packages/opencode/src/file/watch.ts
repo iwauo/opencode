@@ -21,18 +21,14 @@ export namespace FileWatcher {
     () => {
       if (Instance.project.vcs !== "git") return {}
       try {
-        const watcher = fs.watch(
-          Instance.directory,
-          { recursive: true },
-          (event, file) => {
-            log.info("change", { file, event })
-            if (!file) return
-            Bus.publish(Event.Updated, {
-              file,
-              event,
-            })
-          },
-        )
+        const watcher = fs.watch(Instance.directory, { recursive: true }, (event, file) => {
+          log.info("change", { file, event })
+          if (!file) return
+          Bus.publish(Event.Updated, {
+            file,
+            event,
+          })
+        })
         return { watcher }
       } catch {
         return {}

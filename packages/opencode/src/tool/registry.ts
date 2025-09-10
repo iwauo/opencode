@@ -104,9 +104,7 @@ export namespace ToolRegistry {
           body: JSON.stringify({ args }),
         })
         if (!res.ok) {
-          throw new Error(
-            `HTTP tool callback failed: ${res.status} ${await res.text()}`,
-          )
+          throw new Error(`HTTP tool callback failed: ${res.status} ${await res.text()}`)
         }
         const json = (await res.json()) as {
           title?: string
@@ -158,9 +156,7 @@ export namespace ToolRegistry {
     if (providerID === "google") {
       return result.map((t) => ({
         ...t,
-        parameters: sanitizeGeminiParameters(
-          t.parameters as unknown as z.ZodTypeAny,
-        ),
+        parameters: sanitizeGeminiParameters(t.parameters as unknown as z.ZodTypeAny),
       }))
     }
 
@@ -180,10 +176,7 @@ export namespace ToolRegistry {
       result["patch"] = false
       result["write"] = false
     }
-    if (
-      agent.permission.bash["*"] === "deny" &&
-      Object.keys(agent.permission.bash).length === 1
-    ) {
+    if (agent.permission.bash["*"] === "deny" && Object.keys(agent.permission.bash).length === 1) {
       result["bash"] = false
     }
     if (agent.permission.webfetch === "deny") {
@@ -193,10 +186,7 @@ export namespace ToolRegistry {
     return result
   }
 
-  function sanitizeGeminiParameters(
-    schema: z.ZodTypeAny,
-    visited = new Set(),
-  ): z.ZodTypeAny {
+  function sanitizeGeminiParameters(schema: z.ZodTypeAny, visited = new Set()): z.ZodTypeAny {
     if (!schema || visited.has(schema)) {
       return schema
     }
@@ -212,9 +202,7 @@ export namespace ToolRegistry {
       }
       // Otherwise, the default is on a regular type, which is allowed.
       // We recurse on the inner type and then re-apply the default.
-      return sanitizeGeminiParameters(innerSchema, visited).default(
-        schema._def.defaultValue(),
-      )
+      return sanitizeGeminiParameters(innerSchema, visited).default(schema._def.defaultValue())
     }
 
     if (schema instanceof z.ZodOptional) {
@@ -236,30 +224,17 @@ export namespace ToolRegistry {
     if (schema instanceof z.ZodUnion) {
       // This schema corresponds to `anyOf` in JSON Schema.
       // We recursively sanitize each option in the union.
-      const sanitizedOptions = schema.options.map((option: z.ZodTypeAny) =>
-        sanitizeGeminiParameters(option, visited),
-      )
-      return z.union(
-        sanitizedOptions as [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]],
-      )
+      const sanitizedOptions = schema.options.map((option: z.ZodTypeAny) => sanitizeGeminiParameters(option, visited))
+      return z.union(sanitizedOptions as [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]])
     }
 
     if (schema instanceof z.ZodString) {
       const newSchema = z.string({ description: schema.description })
-      const safeChecks = [
-        "min",
-        "max",
-        "length",
-        "regex",
-        "startsWith",
-        "endsWith",
-        "includes",
-        "trim",
-      ]
+      const safeChecks = ["min", "max", "length", "regex", "startsWith", "endsWith", "includes", "trim"]
       // rome-ignore lint/suspicious/noExplicitAny: <explanation>
-      ;(newSchema._def as any).checks = (
-        schema._def as z.ZodStringDef
-      ).checks.filter((check) => safeChecks.includes(check.kind))
+      ;(newSchema._def as any).checks = (schema._def as z.ZodStringDef).checks.filter((check) =>
+        safeChecks.includes(check.kind),
+      )
       return newSchema
     }
 
@@ -289,9 +264,11 @@ export namespace ToolRegistry {
 
     if (schema instanceof z.ZodUnion) {
       return z.union(
-        schema.options.map((option: z.ZodTypeAny) =>
-          optionalToNullable(option),
-        ) as [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]],
+        schema.options.map((option: z.ZodTypeAny) => optionalToNullable(option)) as [
+          z.ZodTypeAny,
+          z.ZodTypeAny,
+          ...z.ZodTypeAny[],
+        ],
       )
     }
 

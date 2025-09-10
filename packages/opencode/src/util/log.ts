@@ -4,9 +4,7 @@ import { Global } from "../global"
 import z from "zod"
 
 export namespace Log {
-  export const Level = z
-    .enum(["DEBUG", "INFO", "WARN", "ERROR"])
-    .openapi({ ref: "LogLevel", description: "Log level" })
+  export const Level = z.enum(["DEBUG", "INFO", "WARN", "ERROR"]).openapi({ ref: "LogLevel", description: "Log level" })
   export type Level = z.infer<typeof Level>
 
   const levelPriority: Record<Level, number> = {
@@ -59,9 +57,7 @@ export namespace Log {
     if (options.print) return
     logpath = path.join(
       Global.Path.log,
-      options.dev
-        ? "dev.log"
-        : new Date().toISOString().split(".")[0].replace(/:/g, "") + ".log",
+      options.dev ? "dev.log" : new Date().toISOString().split(".")[0].replace(/:/g, "") + ".log",
     )
     const logfile = Bun.file(logpath)
     await fs.truncate(logpath).catch(() => {})
@@ -84,9 +80,7 @@ export namespace Log {
     if (files.length <= 5) return
 
     const filesToDelete = files.slice(0, -10)
-    await Promise.all(
-      filesToDelete.map((file) => fs.unlink(file).catch(() => {})),
-    )
+    await Promise.all(filesToDelete.map((file) => fs.unlink(file).catch(() => {})))
   }
 
   function formatError(error: Error, depth = 0): string {
@@ -124,11 +118,7 @@ export namespace Log {
       const next = new Date()
       const diff = next.getTime() - last
       last = next.getTime()
-      return (
-        [next.toISOString().split(".")[0], "+" + diff + "ms", prefix, message]
-          .filter(Boolean)
-          .join(" ") + "\n"
-      )
+      return [next.toISOString().split(".")[0], "+" + diff + "ms", prefix, message].filter(Boolean).join(" ") + "\n"
     }
     const result: Logger = {
       debug(message?: any, extra?: Record<string, any>) {

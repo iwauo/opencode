@@ -16,12 +16,9 @@ export namespace TreeSitter {
 
   const WasmParser = lazy(async () => {
     const { default: Parser } = await import("web-tree-sitter")
-    const { default: treeWasm } = await import(
-      "web-tree-sitter/tree-sitter.wasm" as string,
-      {
-        with: { type: "wasm" },
-      }
-    )
+    const { default: treeWasm } = await import("web-tree-sitter/tree-sitter.wasm" as string, {
+      with: { type: "wasm" },
+    })
     await Parser.init({
       locateFile() {
         return treeWasm

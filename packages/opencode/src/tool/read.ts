@@ -15,27 +15,16 @@ export const ReadTool = Tool.define("read", {
   description: DESCRIPTION,
   parameters: z.object({
     filePath: z.string().describe("The path to the file to read"),
-    offset: z.coerce
-      .number()
-      .describe("The line number to start reading from (0-based)")
-      .optional(),
-    limit: z.coerce
-      .number()
-      .describe("The number of lines to read (defaults to 2000)")
-      .optional(),
+    offset: z.coerce.number().describe("The line number to start reading from (0-based)").optional(),
+    limit: z.coerce.number().describe("The number of lines to read (defaults to 2000)").optional(),
   }),
   async execute(params, ctx) {
     let filepath = params.filePath
     if (!path.isAbsolute(filepath)) {
       filepath = path.join(process.cwd(), filepath)
     }
-    if (
-      !ctx.extra?.["bypassCwdCheck"] &&
-      !Filesystem.contains(Instance.directory, filepath)
-    ) {
-      throw new Error(
-        `File ${filepath} is not in the current working directory`,
-      )
+    if (!ctx.extra?.["bypassCwdCheck"] && !Filesystem.contains(Instance.directory, filepath)) {
+      throw new Error(`File ${filepath} is not in the current working directory`)
     }
 
     const file = Bun.file(filepath)
@@ -47,16 +36,13 @@ export const ReadTool = Tool.define("read", {
       const suggestions = dirEntries
         .filter(
           (entry) =>
-            entry.toLowerCase().includes(base.toLowerCase()) ||
-            base.toLowerCase().includes(entry.toLowerCase()),
+            entry.toLowerCase().includes(base.toLowerCase()) || base.toLowerCase().includes(entry.toLowerCase()),
         )
         .map((entry) => path.join(dir, entry))
         .slice(0, 3)
 
       if (suggestions.length > 0) {
-        throw new Error(
-          `File not found: ${filepath}\n\nDid you mean one of these?\n${suggestions.join("\n")}`,
-        )
+        throw new Error(`File not found: ${filepath}\n\nDid you mean one of these?\n${suggestions.join("\n")}`)
       }
 
       throw new Error(`File not found: ${filepath}`)
@@ -65,17 +51,12 @@ export const ReadTool = Tool.define("read", {
     const limit = params.limit ?? DEFAULT_READ_LIMIT
     const offset = params.offset || 0
     const isImage = isImageFile(filepath)
-    if (isImage)
-      throw new Error(
-        `This is an image file of type: ${isImage}\nUse a different tool to process images`,
-      )
+    if (isImage) throw new Error(`This is an image file of type: ${isImage}\nUse a different tool to process images`)
     const isBinary = await isBinaryFile(filepath, file)
     if (isBinary) throw new Error(`Cannot read binary file: ${filepath}`)
     const lines = await file.text().then((text) => text.split("\n"))
     const raw = lines.slice(offset, offset + limit).map((line) => {
-      return line.length > MAX_LINE_LENGTH
-        ? line.substring(0, MAX_LINE_LENGTH) + "..."
-        : line
+      return line.length > MAX_LINE_LENGTH ? line.substring(0, MAX_LINE_LENGTH) + "..." : line
     })
     const content = raw.map((line, index) => {
       return `${(index + offset + 1).toString().padStart(5, "0")}| ${line}`
@@ -123,10 +104,7 @@ function isImageFile(filePath: string): string | false {
   }
 }
 
-async function isBinaryFile(
-  filepath: string,
-  file: Bun.BunFile,
-): Promise<boolean> {
+async function isBinaryFile(filepath: string, file: Bun.BunFile): Promise<boolean> {
   const ext = path.extname(filepath).toLowerCase()
   // binary check for common non-text extensions
   switch (ext) {

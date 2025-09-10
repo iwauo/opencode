@@ -12,11 +12,7 @@ import { NamedError } from "../util/error"
 import matter from "gray-matter"
 import { Flag } from "../flag/flag"
 import { Auth } from "../auth"
-import {
-  type ParseError as JsoncParseError,
-  parse as parseJsonc,
-  printParseErrorCode,
-} from "jsonc-parser"
+import { type ParseError as JsoncParseError, parse as parseJsonc, printParseErrorCode } from "jsonc-parser"
 import { Instance } from "../project/instance"
 
 export namespace Config {
@@ -26,11 +22,7 @@ export namespace Config {
     const auth = await Auth.all()
     let result = await global()
     for (const file of ["opencode.jsonc", "opencode.json"]) {
-      const found = await Filesystem.findUp(
-        file,
-        Instance.directory,
-        Instance.worktree,
-      )
+      const found = await Filesystem.findUp(file, Instance.directory, Instance.worktree)
       for (const resolved of found.toReversed()) {
         result = mergeDeep(result, await loadFile(resolved))
       }
@@ -50,28 +42,15 @@ export namespace Config {
     for (const [key, value] of Object.entries(auth)) {
       if (value.type === "wellknown") {
         process.env[value.key] = value.token
-        const wellknown = (await fetch(`${key}/.well-known/opencode`).then(
-          (x) => x.json(),
-        )) as any
-        result = mergeDeep(
-          result,
-          await load(JSON.stringify(wellknown.config ?? {}), process.cwd()),
-        )
+        const wellknown = (await fetch(`${key}/.well-known/opencode`).then((x) => x.json())) as any
+        result = mergeDeep(result, await load(JSON.stringify(wellknown.config ?? {}), process.cwd()))
       }
     }
 
     result.agent = result.agent || {}
     const markdownAgents = [
-      ...(await Filesystem.globUp(
-        "agent/**/*.md",
-        Global.Path.config,
-        Global.Path.config,
-      )),
-      ...(await Filesystem.globUp(
-        ".opencode/agent/**/*.md",
-        Instance.directory,
-        Instance.worktree,
-      )),
+      ...(await Filesystem.globUp("agent/**/*.md", Global.Path.config, Global.Path.config)),
+      ...(await Filesystem.globUp(".opencode/agent/**/*.md", Instance.directory, Instance.worktree)),
     ]
     for (const item of markdownAgents) {
       const content = await Bun.file(item).text()
@@ -90,10 +69,7 @@ export namespace Config {
       if (agentFolderPath.includes("/")) {
         const relativePath = agentFolderPath.replace(".md", "")
         const pathParts = relativePath.split("/")
-        agentName =
-          pathParts.slice(0, -1).join("/") +
-          "/" +
-          pathParts[pathParts.length - 1]
+        agentName = pathParts.slice(0, -1).join("/") + "/" + pathParts[pathParts.length - 1]
       }
 
       const config = {
@@ -114,16 +90,8 @@ export namespace Config {
     // Load mode markdown files
     result.mode = result.mode || {}
     const markdownModes = [
-      ...(await Filesystem.globUp(
-        "mode/*.md",
-        Global.Path.config,
-        Global.Path.config,
-      )),
-      ...(await Filesystem.globUp(
-        ".opencode/mode/*.md",
-        Instance.directory,
-        Instance.worktree,
-      )),
+      ...(await Filesystem.globUp("mode/*.md", Global.Path.config, Global.Path.config)),
+      ...(await Filesystem.globUp(".opencode/mode/*.md", Instance.directory, Instance.worktree)),
     ]
     for (const item of markdownModes) {
       const content = await Bun.file(item).text()
@@ -150,16 +118,8 @@ export namespace Config {
     // Load command markdown files
     result.command = result.command || {}
     const markdownCommands = [
-      ...(await Filesystem.globUp(
-        "command/*.md",
-        Global.Path.config,
-        Global.Path.config,
-      )),
-      ...(await Filesystem.globUp(
-        ".opencode/command/*.md",
-        Instance.directory,
-        Instance.worktree,
-      )),
+      ...(await Filesystem.globUp("command/*.md", Global.Path.config, Global.Path.config)),
+      ...(await Filesystem.globUp(".opencode/command/*.md", Instance.directory, Instance.worktree)),
     ]
     for (const item of markdownCommands) {
       const content = await Bun.file(item).text()
@@ -193,24 +153,13 @@ export namespace Config {
     result.plugin = result.plugin || []
     result.plugin.push(
       ...[
-        ...(await Filesystem.globUp(
-          "plugin/*.{ts,js}",
-          Global.Path.config,
-          Global.Path.config,
-        )),
-        ...(await Filesystem.globUp(
-          ".opencode/plugin/*.{ts,js}",
-          Instance.directory,
-          Instance.worktree,
-        )),
+        ...(await Filesystem.globUp("plugin/*.{ts,js}", Global.Path.config, Global.Path.config)),
+        ...(await Filesystem.globUp(".opencode/plugin/*.{ts,js}", Instance.directory, Instance.worktree)),
       ].map((x) => "file://" + x),
     )
 
     if (Flag.OPENCODE_PERMISSION) {
-      result.permission = mergeDeep(
-        result.permission ?? {},
-        JSON.parse(Flag.OPENCODE_PERMISSION),
-      )
+      result.permission = mergeDeep(result.permission ?? {}, JSON.parse(Flag.OPENCODE_PERMISSION))
     }
 
     if (!result.username) result.username = os.userInfo().username
@@ -233,19 +182,13 @@ export namespace Config {
     if (result.keybinds?.switch_mode && !result.keybinds.switch_agent) {
       result.keybinds.switch_agent = result.keybinds.switch_mode
     }
-    if (
-      result.keybinds?.switch_mode_reverse &&
-      !result.keybinds.switch_agent_reverse
-    ) {
+    if (result.keybinds?.switch_mode_reverse && !result.keybinds.switch_agent_reverse) {
       result.keybinds.switch_agent_reverse = result.keybinds.switch_mode_reverse
     }
     if (result.keybinds?.switch_agent && !result.keybinds.agent_cycle) {
       result.keybinds.agent_cycle = result.keybinds.switch_agent
     }
-    if (
-      result.keybinds?.switch_agent_reverse &&
-      !result.keybinds.agent_cycle_reverse
-    ) {
+    if (result.keybinds?.switch_agent_reverse && !result.keybinds.agent_cycle_reverse) {
       result.keybinds.agent_cycle_reverse = result.keybinds.switch_agent_reverse
     }
 
@@ -255,18 +198,12 @@ export namespace Config {
   export const McpLocal = z
     .object({
       type: z.literal("local").describe("Type of MCP server connection"),
-      command: z
-        .string()
-        .array()
-        .describe("Command and arguments to run the MCP server"),
+      command: z.string().array().describe("Command and arguments to run the MCP server"),
       environment: z
         .record(z.string(), z.string())
         .optional()
         .describe("Environment variables to set when running the MCP server"),
-      enabled: z
-        .boolean()
-        .optional()
-        .describe("Enable or disable the MCP server on startup"),
+      enabled: z.boolean().optional().describe("Enable or disable the MCP server on startup"),
     })
     .strict()
     .openapi({
@@ -277,14 +214,8 @@ export namespace Config {
     .object({
       type: z.literal("remote").describe("Type of MCP server connection"),
       url: z.string().describe("URL of the remote MCP server"),
-      enabled: z
-        .boolean()
-        .optional()
-        .describe("Enable or disable the MCP server on startup"),
-      headers: z
-        .record(z.string(), z.string())
-        .optional()
-        .describe("Headers to send with the request"),
+      enabled: z.boolean().optional().describe("Enable or disable the MCP server on startup"),
+      headers: z.record(z.string(), z.string()).optional().describe("Headers to send with the request"),
     })
     .strict()
     .openapi({
@@ -294,11 +225,7 @@ export namespace Config {
   export const Mcp = z.discriminatedUnion("type", [McpLocal, McpRemote])
   export type Mcp = z.infer<typeof Mcp>
 
-  export const Permission = z.union([
-    z.literal("ask"),
-    z.literal("allow"),
-    z.literal("deny"),
-  ])
+  export const Permission = z.union([z.literal("ask"), z.literal("allow"), z.literal("deny")])
   export type Permission = z.infer<typeof Permission>
 
   export const Command = z.object({
@@ -317,19 +244,12 @@ export namespace Config {
       prompt: z.string().optional(),
       tools: z.record(z.string(), z.boolean()).optional(),
       disable: z.boolean().optional(),
-      description: z
-        .string()
-        .optional()
-        .describe("Description of when to use the agent"),
-      mode: z
-        .union([z.literal("subagent"), z.literal("primary"), z.literal("all")])
-        .optional(),
+      description: z.string().optional().describe("Description of when to use the agent"),
+      mode: z.union([z.literal("subagent"), z.literal("primary"), z.literal("all")]).optional(),
       permission: z
         .object({
           edit: Permission.optional(),
-          bash: z
-            .union([Permission, z.record(z.string(), Permission)])
-            .optional(),
+          bash: z.union([Permission, z.record(z.string(), Permission)]).optional(),
           webfetch: Permission.optional(),
         })
         .optional(),
@@ -342,248 +262,72 @@ export namespace Config {
 
   export const Keybinds = z
     .object({
-      leader: z
-        .string()
-        .optional()
-        .default("ctrl+x")
-        .describe("Leader key for keybind combinations"),
-      app_help: z
-        .string()
-        .optional()
-        .default("<leader>h")
-        .describe("Show help dialog"),
-      app_exit: z
-        .string()
-        .optional()
-        .default("ctrl+c,<leader>q")
-        .describe("Exit the application"),
-      editor_open: z
-        .string()
-        .optional()
-        .default("<leader>e")
-        .describe("Open external editor"),
-      theme_list: z
-        .string()
-        .optional()
-        .default("<leader>t")
-        .describe("List available themes"),
-      project_init: z
-        .string()
-        .optional()
-        .default("<leader>i")
-        .describe("Create/update AGENTS.md"),
-      tool_details: z
-        .string()
-        .optional()
-        .default("<leader>d")
-        .describe("Toggle tool details"),
-      thinking_blocks: z
-        .string()
-        .optional()
-        .default("<leader>b")
-        .describe("Toggle thinking blocks"),
-      session_export: z
-        .string()
-        .optional()
-        .default("<leader>x")
-        .describe("Export session to editor"),
-      session_new: z
-        .string()
-        .optional()
-        .default("<leader>n")
-        .describe("Create a new session"),
-      session_list: z
-        .string()
-        .optional()
-        .default("<leader>l")
-        .describe("List all sessions"),
-      session_timeline: z
-        .string()
-        .optional()
-        .default("<leader>g")
-        .describe("Show session timeline"),
-      session_share: z
-        .string()
-        .optional()
-        .default("<leader>s")
-        .describe("Share current session"),
-      session_unshare: z
-        .string()
-        .optional()
-        .default("none")
-        .describe("Unshare current session"),
-      session_interrupt: z
-        .string()
-        .optional()
-        .default("esc")
-        .describe("Interrupt current session"),
-      session_compact: z
-        .string()
-        .optional()
-        .default("<leader>c")
-        .describe("Compact the session"),
-      session_child_cycle: z
-        .string()
-        .optional()
-        .default("ctrl+right")
-        .describe("Cycle to next child session"),
+      leader: z.string().optional().default("ctrl+x").describe("Leader key for keybind combinations"),
+      app_help: z.string().optional().default("<leader>h").describe("Show help dialog"),
+      app_exit: z.string().optional().default("ctrl+c,<leader>q").describe("Exit the application"),
+      editor_open: z.string().optional().default("<leader>e").describe("Open external editor"),
+      theme_list: z.string().optional().default("<leader>t").describe("List available themes"),
+      project_init: z.string().optional().default("<leader>i").describe("Create/update AGENTS.md"),
+      tool_details: z.string().optional().default("<leader>d").describe("Toggle tool details"),
+      thinking_blocks: z.string().optional().default("<leader>b").describe("Toggle thinking blocks"),
+      session_export: z.string().optional().default("<leader>x").describe("Export session to editor"),
+      session_new: z.string().optional().default("<leader>n").describe("Create a new session"),
+      session_list: z.string().optional().default("<leader>l").describe("List all sessions"),
+      session_timeline: z.string().optional().default("<leader>g").describe("Show session timeline"),
+      session_share: z.string().optional().default("<leader>s").describe("Share current session"),
+      session_unshare: z.string().optional().default("none").describe("Unshare current session"),
+      session_interrupt: z.string().optional().default("esc").describe("Interrupt current session"),
+      session_compact: z.string().optional().default("<leader>c").describe("Compact the session"),
+      session_child_cycle: z.string().optional().default("ctrl+right").describe("Cycle to next child session"),
       session_child_cycle_reverse: z
         .string()
         .optional()
         .default("ctrl+left")
         .describe("Cycle to previous child session"),
-      messages_page_up: z
-        .string()
-        .optional()
-        .default("pgup")
-        .describe("Scroll messages up by one page"),
-      messages_page_down: z
-        .string()
-        .optional()
-        .default("pgdown")
-        .describe("Scroll messages down by one page"),
-      messages_half_page_up: z
-        .string()
-        .optional()
-        .default("ctrl+alt+u")
-        .describe("Scroll messages up by half page"),
+      messages_page_up: z.string().optional().default("pgup").describe("Scroll messages up by one page"),
+      messages_page_down: z.string().optional().default("pgdown").describe("Scroll messages down by one page"),
+      messages_half_page_up: z.string().optional().default("ctrl+alt+u").describe("Scroll messages up by half page"),
       messages_half_page_down: z
         .string()
         .optional()
         .default("ctrl+alt+d")
         .describe("Scroll messages down by half page"),
-      messages_first: z
-        .string()
-        .optional()
-        .default("ctrl+g")
-        .describe("Navigate to first message"),
-      messages_last: z
-        .string()
-        .optional()
-        .default("ctrl+alt+g")
-        .describe("Navigate to last message"),
-      messages_copy: z
-        .string()
-        .optional()
-        .default("<leader>y")
-        .describe("Copy message"),
-      messages_undo: z
-        .string()
-        .optional()
-        .default("<leader>u")
-        .describe("Undo message"),
-      messages_redo: z
-        .string()
-        .optional()
-        .default("<leader>r")
-        .describe("Redo message"),
-      model_list: z
-        .string()
-        .optional()
-        .default("<leader>m")
-        .describe("List available models"),
-      model_cycle_recent: z
-        .string()
-        .optional()
-        .default("f2")
-        .describe("Next recent model"),
-      model_cycle_recent_reverse: z
-        .string()
-        .optional()
-        .default("shift+f2")
-        .describe("Previous recent model"),
-      agent_list: z
-        .string()
-        .optional()
-        .default("<leader>a")
-        .describe("List agents"),
+      messages_first: z.string().optional().default("ctrl+g").describe("Navigate to first message"),
+      messages_last: z.string().optional().default("ctrl+alt+g").describe("Navigate to last message"),
+      messages_copy: z.string().optional().default("<leader>y").describe("Copy message"),
+      messages_undo: z.string().optional().default("<leader>u").describe("Undo message"),
+      messages_redo: z.string().optional().default("<leader>r").describe("Redo message"),
+      model_list: z.string().optional().default("<leader>m").describe("List available models"),
+      model_cycle_recent: z.string().optional().default("f2").describe("Next recent model"),
+      model_cycle_recent_reverse: z.string().optional().default("shift+f2").describe("Previous recent model"),
+      agent_list: z.string().optional().default("<leader>a").describe("List agents"),
       agent_cycle: z.string().optional().default("tab").describe("Next agent"),
-      agent_cycle_reverse: z
-        .string()
-        .optional()
-        .default("shift+tab")
-        .describe("Previous agent"),
-      input_clear: z
-        .string()
-        .optional()
-        .default("ctrl+c")
-        .describe("Clear input field"),
-      input_paste: z
-        .string()
-        .optional()
-        .default("ctrl+v")
-        .describe("Paste from clipboard"),
-      input_submit: z
-        .string()
-        .optional()
-        .default("enter")
-        .describe("Submit input"),
-      input_newline: z
-        .string()
-        .optional()
-        .default("shift+enter,ctrl+j")
-        .describe("Insert newline in input"),
+      agent_cycle_reverse: z.string().optional().default("shift+tab").describe("Previous agent"),
+      input_clear: z.string().optional().default("ctrl+c").describe("Clear input field"),
+      input_paste: z.string().optional().default("ctrl+v").describe("Paste from clipboard"),
+      input_submit: z.string().optional().default("enter").describe("Submit input"),
+      input_newline: z.string().optional().default("shift+enter,ctrl+j").describe("Insert newline in input"),
       // Deprecated commands
-      switch_mode: z
-        .string()
-        .optional()
-        .default("none")
-        .describe("@deprecated use agent_cycle. Next mode"),
+      switch_mode: z.string().optional().default("none").describe("@deprecated use agent_cycle. Next mode"),
       switch_mode_reverse: z
         .string()
         .optional()
         .default("none")
         .describe("@deprecated use agent_cycle_reverse. Previous mode"),
-      switch_agent: z
-        .string()
-        .optional()
-        .default("tab")
-        .describe("@deprecated use agent_cycle. Next agent"),
+      switch_agent: z.string().optional().default("tab").describe("@deprecated use agent_cycle. Next agent"),
       switch_agent_reverse: z
         .string()
         .optional()
         .default("shift+tab")
         .describe("@deprecated use agent_cycle_reverse. Previous agent"),
-      file_list: z
-        .string()
-        .optional()
-        .default("none")
-        .describe("@deprecated Currently not available. List files"),
-      file_close: z
-        .string()
-        .optional()
-        .default("none")
-        .describe("@deprecated Close file"),
-      file_search: z
-        .string()
-        .optional()
-        .default("none")
-        .describe("@deprecated Search file"),
-      file_diff_toggle: z
-        .string()
-        .optional()
-        .default("none")
-        .describe("@deprecated Split/unified diff"),
-      messages_previous: z
-        .string()
-        .optional()
-        .default("none")
-        .describe("@deprecated Navigate to previous message"),
-      messages_next: z
-        .string()
-        .optional()
-        .default("none")
-        .describe("@deprecated Navigate to next message"),
-      messages_layout_toggle: z
-        .string()
-        .optional()
-        .default("none")
-        .describe("@deprecated Toggle layout"),
-      messages_revert: z
-        .string()
-        .optional()
-        .default("none")
-        .describe("@deprecated use messages_undo. Revert message"),
+      file_list: z.string().optional().default("none").describe("@deprecated Currently not available. List files"),
+      file_close: z.string().optional().default("none").describe("@deprecated Close file"),
+      file_search: z.string().optional().default("none").describe("@deprecated Search file"),
+      file_diff_toggle: z.string().optional().default("none").describe("@deprecated Split/unified diff"),
+      messages_previous: z.string().optional().default("none").describe("@deprecated Navigate to previous message"),
+      messages_next: z.string().optional().default("none").describe("@deprecated Navigate to next message"),
+      messages_layout_toggle: z.string().optional().default("none").describe("@deprecated Toggle layout"),
+      messages_revert: z.string().optional().default("none").describe("@deprecated use messages_undo. Revert message"),
     })
     .strict()
     .openapi({
@@ -591,12 +335,7 @@ export namespace Config {
     })
 
   export const TUI = z.object({
-    scroll_speed: z
-      .number()
-      .min(1)
-      .optional()
-      .default(2)
-      .describe("TUI scroll speed"),
+    scroll_speed: z.number().min(1).optional().default(2).describe("TUI scroll speed"),
   })
 
   export const Layout = z.enum(["auto", "stretch"]).openapi({
@@ -606,22 +345,14 @@ export namespace Config {
 
   export const Info = z
     .object({
-      $schema: z
-        .string()
-        .optional()
-        .describe("JSON schema reference for configuration validation"),
-      theme: z
-        .string()
-        .optional()
-        .describe("Theme name to use for the interface"),
+      $schema: z.string().optional().describe("JSON schema reference for configuration validation"),
+      theme: z.string().optional().describe("Theme name to use for the interface"),
       keybinds: Keybinds.optional().describe("Custom keybind configurations"),
       tui: TUI.optional().describe("TUI specific settings"),
       command: z
         .record(z.string(), Command)
         .optional()
-        .describe(
-          "Command configuration, see https://opencode.ai/docs/commands",
-        ),
+        .describe("Command configuration, see https://opencode.ai/docs/commands"),
       plugin: z.string().array().optional(),
       snapshot: z.boolean().optional(),
       share: z
@@ -633,35 +364,18 @@ export namespace Config {
       autoshare: z
         .boolean()
         .optional()
-        .describe(
-          "@deprecated Use 'share' field instead. Share newly created sessions automatically",
-        ),
-      autoupdate: z
-        .boolean()
-        .optional()
-        .describe("Automatically update to the latest version"),
-      disabled_providers: z
-        .array(z.string())
-        .optional()
-        .describe("Disable providers that are loaded automatically"),
-      model: z
-        .string()
-        .describe(
-          "Model to use in the format of provider/model, eg anthropic/claude-2",
-        )
-        .optional(),
+        .describe("@deprecated Use 'share' field instead. Share newly created sessions automatically"),
+      autoupdate: z.boolean().optional().describe("Automatically update to the latest version"),
+      disabled_providers: z.array(z.string()).optional().describe("Disable providers that are loaded automatically"),
+      model: z.string().describe("Model to use in the format of provider/model, eg anthropic/claude-2").optional(),
       small_model: z
         .string()
-        .describe(
-          "Small model to use for tasks like title generation in the format of provider/model",
-        )
+        .describe("Small model to use for tasks like title generation in the format of provider/model")
         .optional(),
       username: z
         .string()
         .optional()
-        .describe(
-          "Custom username to display in conversations instead of system username",
-        ),
+        .describe("Custom username to display in conversations instead of system username"),
       mode: z
         .object({
           build: Agent.optional(),
@@ -697,11 +411,7 @@ export namespace Config {
                         .describe(
                           "Timeout in milliseconds for requests to this provider. Default is 300000 (5 minutes). Set to false to disable timeout.",
                         ),
-                      z
-                        .literal(false)
-                        .describe(
-                          "Disable timeout for this provider entirely.",
-                        ),
+                      z.literal(false).describe("Disable timeout for this provider entirely."),
                     ])
                     .optional()
                     .describe(
@@ -715,10 +425,7 @@ export namespace Config {
         )
         .optional()
         .describe("Custom provider configurations and model overrides"),
-      mcp: z
-        .record(z.string(), Mcp)
-        .optional()
-        .describe("MCP (Model Context Protocol) server configurations"),
+      mcp: z.record(z.string(), Mcp).optional().describe("MCP (Model Context Protocol) server configurations"),
       formatter: z
         .record(
           z.string(),
@@ -747,19 +454,12 @@ export namespace Config {
           ]),
         )
         .optional(),
-      instructions: z
-        .array(z.string())
-        .optional()
-        .describe("Additional instruction files or patterns to include"),
-      layout: Layout.optional().describe(
-        "@deprecated Always uses stretch layout.",
-      ),
+      instructions: z.array(z.string()).optional().describe("Additional instruction files or patterns to include"),
+      layout: Layout.optional().describe("@deprecated Always uses stretch layout."),
       permission: z
         .object({
           edit: Permission.optional(),
-          bash: z
-            .union([Permission, z.record(z.string(), Permission)])
-            .optional(),
+          bash: z.union([Permission, z.record(z.string(), Permission)]).optional(),
           webfetch: Permission.optional(),
         })
         .optional(),
@@ -803,9 +503,7 @@ export namespace Config {
       {},
       mergeDeep(await loadFile(path.join(Global.Path.config, "config.json"))),
       mergeDeep(await loadFile(path.join(Global.Path.config, "opencode.json"))),
-      mergeDeep(
-        await loadFile(path.join(Global.Path.config, "opencode.jsonc")),
-      ),
+      mergeDeep(await loadFile(path.join(Global.Path.config, "opencode.jsonc"))),
     )
 
     await import(path.join(Global.Path.config, "config"), {
@@ -818,10 +516,7 @@ export namespace Config {
         if (provider && model) result.model = `${provider}/${model}`
         result["$schema"] = "https://opencode.ai/config.json"
         result = mergeDeep(result, rest)
-        await Bun.write(
-          path.join(Global.Path.config, "config.json"),
-          JSON.stringify(result, null, 2),
-        )
+        await Bun.write(path.join(Global.Path.config, "config.json"), JSON.stringify(result, null, 2))
         await fs.unlink(path.join(Global.Path.config, "config"))
       })
       .catch(() => {})
@@ -860,9 +555,7 @@ export namespace Config {
         if (filePath.startsWith("~/")) {
           filePath = path.join(os.homedir(), filePath.slice(2))
         }
-        const resolvedPath = path.isAbsolute(filePath)
-          ? filePath
-          : path.resolve(configDir, filePath)
+        const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(configDir, filePath)
         const fileContent = (
           await Bun.file(resolvedPath)
             .text()
@@ -877,10 +570,7 @@ export namespace Config {
                   { cause: error },
                 )
               }
-              throw new InvalidError(
-                { path: configFilepath, message: errMsg },
-                { cause: error },
-              )
+              throw new InvalidError({ path: configFilepath, message: errMsg }, { cause: error })
             })
         ).trim()
         // escape newlines/quotes, strip outer quotes

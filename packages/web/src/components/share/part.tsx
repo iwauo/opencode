@@ -1,15 +1,6 @@
 import map from "lang-map"
 import { DateTime } from "luxon"
-import {
-  For,
-  Show,
-  Match,
-  Switch,
-  type JSX,
-  createMemo,
-  createSignal,
-  type ParentProps,
-} from "solid-js"
+import { For, Show, Match, Switch, type JSX, createMemo, createSignal, type ParentProps } from "solid-js"
 import {
   IconHashtag,
   IconSparkles,
@@ -28,14 +19,7 @@ import {
   IconMagnifyingGlass,
   IconDocumentMagnifyingGlass,
 } from "../icons"
-import {
-  IconMeta,
-  IconRobot,
-  IconOpenAI,
-  IconGemini,
-  IconAnthropic,
-  IconBrain,
-} from "../icons/custom"
+import { IconMeta, IconRobot, IconOpenAI, IconGemini, IconAnthropic, IconBrain } from "../icons/custom"
 import { ContentCode } from "./content-code"
 import { ContentDiff } from "./content-diff"
 import { ContentText } from "./content-text"
@@ -88,96 +72,51 @@ export function Part(props: PartProps) {
             }}
           >
             <Switch>
-              <Match
-                when={
-                  props.message.role === "user" && props.part.type === "text"
-                }
-              >
+              <Match when={props.message.role === "user" && props.part.type === "text"}>
                 <IconUserCircle width={18} height={18} />
               </Match>
-              <Match
-                when={
-                  props.message.role === "user" && props.part.type === "file"
-                }
-              >
+              <Match when={props.message.role === "user" && props.part.type === "file"}>
                 <IconPaperClip width={18} height={18} />
               </Match>
               <Match
-                when={
-                  props.part.type === "step-start" &&
-                  props.message.role === "assistant" &&
-                  props.message.modelID
-                }
+                when={props.part.type === "step-start" && props.message.role === "assistant" && props.message.modelID}
               >
                 {(model) => <ProviderIcon model={model()} size={18} />}
               </Match>
-              <Match
-                when={
-                  props.part.type === "reasoning" &&
-                  props.message.role === "assistant"
-                }
-              >
+              <Match when={props.part.type === "reasoning" && props.message.role === "assistant"}>
                 <IconBrain width={18} height={18} />
               </Match>
-              <Match
-                when={
-                  props.part.type === "tool" && props.part.tool === "todowrite"
-                }
-              >
+              <Match when={props.part.type === "tool" && props.part.tool === "todowrite"}>
                 <IconQueueList width={18} height={18} />
               </Match>
-              <Match
-                when={
-                  props.part.type === "tool" && props.part.tool === "todoread"
-                }
-              >
+              <Match when={props.part.type === "tool" && props.part.tool === "todoread"}>
                 <IconQueueList width={18} height={18} />
               </Match>
-              <Match
-                when={props.part.type === "tool" && props.part.tool === "bash"}
-              >
+              <Match when={props.part.type === "tool" && props.part.tool === "bash"}>
                 <IconCommandLine width={18} height={18} />
               </Match>
-              <Match
-                when={props.part.type === "tool" && props.part.tool === "edit"}
-              >
+              <Match when={props.part.type === "tool" && props.part.tool === "edit"}>
                 <IconPencilSquare width={18} height={18} />
               </Match>
-              <Match
-                when={props.part.type === "tool" && props.part.tool === "write"}
-              >
+              <Match when={props.part.type === "tool" && props.part.tool === "write"}>
                 <IconDocumentPlus width={18} height={18} />
               </Match>
-              <Match
-                when={props.part.type === "tool" && props.part.tool === "read"}
-              >
+              <Match when={props.part.type === "tool" && props.part.tool === "read"}>
                 <IconDocument width={18} height={18} />
               </Match>
-              <Match
-                when={props.part.type === "tool" && props.part.tool === "grep"}
-              >
+              <Match when={props.part.type === "tool" && props.part.tool === "grep"}>
                 <IconDocumentMagnifyingGlass width={18} height={18} />
               </Match>
-              <Match
-                when={props.part.type === "tool" && props.part.tool === "list"}
-              >
+              <Match when={props.part.type === "tool" && props.part.tool === "list"}>
                 <IconRectangleStack width={18} height={18} />
               </Match>
-              <Match
-                when={props.part.type === "tool" && props.part.tool === "glob"}
-              >
+              <Match when={props.part.type === "tool" && props.part.tool === "glob"}>
                 <IconMagnifyingGlass width={18} height={18} />
               </Match>
-              <Match
-                when={
-                  props.part.type === "tool" && props.part.tool === "webfetch"
-                }
-              >
+              <Match when={props.part.type === "tool" && props.part.tool === "webfetch"}>
                 <IconGlobeAlt width={18} height={18} />
               </Match>
-              <Match
-                when={props.part.type === "tool" && props.part.tool === "task"}
-              >
+              <Match when={props.part.type === "tool" && props.part.tool === "task"}>
                 <IconRobot width={18} height={18} />
               </Match>
               <Match when={true}>
@@ -202,44 +141,33 @@ export function Part(props: PartProps) {
             <div data-component="assistant-text-markdown">
               <ContentMarkdown expand={props.last} text={props.part.text} />
             </div>
-            {props.last &&
-              props.message.role === "assistant" &&
-              props.message.time.completed && (
-                <Footer
-                  title={DateTime.fromMillis(
-                    props.message.time.completed,
-                  ).toLocaleString(DateTime.DATETIME_FULL_WITH_SECONDS)}
-                >
-                  {DateTime.fromMillis(
-                    props.message.time.completed,
-                  ).toLocaleString(DateTime.DATETIME_MED)}
-                </Footer>
-              )}
+            {props.last && props.message.role === "assistant" && props.message.time.completed && (
+              <Footer
+                title={DateTime.fromMillis(props.message.time.completed).toLocaleString(
+                  DateTime.DATETIME_FULL_WITH_SECONDS,
+                )}
+              >
+                {DateTime.fromMillis(props.message.time.completed).toLocaleString(DateTime.DATETIME_MED)}
+              </Footer>
+            )}
           </div>
         )}
-        {props.message.role === "assistant" &&
-          props.part.type === "reasoning" && (
-            <div data-component="tool">
-              <div data-component="tool-title">
-                <span data-slot="name">Thinking</span>
-              </div>
-              <Show when={props.part.text}>
-                <div data-component="assistant-reasoning">
-                  <ResultsButton
-                    showCopy="Show details"
-                    hideCopy="Hide details"
-                  >
-                    <div data-component="assistant-reasoning-markdown">
-                      <ContentMarkdown
-                        expand
-                        text={props.part.text || "Thinking..."}
-                      />
-                    </div>
-                  </ResultsButton>
-                </div>
-              </Show>
+        {props.message.role === "assistant" && props.part.type === "reasoning" && (
+          <div data-component="tool">
+            <div data-component="tool-title">
+              <span data-slot="name">Thinking</span>
             </div>
-          )}
+            <Show when={props.part.text}>
+              <div data-component="assistant-reasoning">
+                <ResultsButton showCopy="Show details" hideCopy="Hide details">
+                  <div data-component="assistant-reasoning-markdown">
+                    <ContentMarkdown expand text={props.part.text || "Thinking..."} />
+                  </div>
+                </ResultsButton>
+              </div>
+            </Show>
+          </div>
+        )}
         {props.message.role === "user" && props.part.type === "file" && (
           <div data-component="attachment">
             <div data-slot="copy">Attachment</div>
@@ -415,17 +343,10 @@ function getShikiLang(filename: string) {
   return type ? (overrides[type] ?? type) : "plaintext"
 }
 
-function getDiagnostics(
-  diagnosticsByFile: Record<string, Diagnostic[]>,
-  currentFile: string,
-): JSX.Element[] {
+function getDiagnostics(diagnosticsByFile: Record<string, Diagnostic[]>, currentFile: string): JSX.Element[] {
   const result: JSX.Element[] = []
 
-  if (
-    diagnosticsByFile === undefined ||
-    diagnosticsByFile[currentFile] === undefined
-  )
-    return result
+  if (diagnosticsByFile === undefined || diagnosticsByFile[currentFile] === undefined) return result
 
   for (const diags of Object.values(diagnosticsByFile)) {
     for (const d of diags) {
@@ -476,9 +397,7 @@ export function TodoWriteTool(props: ToolProps) {
     completed: 2,
   }
   const todos = createMemo(() =>
-    ((props.state.input?.todos ?? []) as Todo[])
-      .slice()
-      .sort((a, b) => priority[a.status] - priority[b.status]),
+    ((props.state.input?.todos ?? []) as Todo[]).slice().sort((a, b) => priority[a.status] - priority[b.status]),
   )
   const starting = () => todos().every((t: Todo) => t.status === "pending")
   const finished = () => todos().every((t: Todo) => t.status === "completed")
@@ -514,35 +433,19 @@ export function GrepTool(props: ToolProps) {
     <>
       <div data-component="tool-title">
         <span data-slot="name">Grep</span>
-        <span data-slot="target">
-          &ldquo;{props.state.input.pattern}&rdquo;
-        </span>
+        <span data-slot="target">&ldquo;{props.state.input.pattern}&rdquo;</span>
       </div>
       <div data-component="tool-result">
         <Switch>
-          <Match
-            when={
-              props.state.metadata?.matches && props.state.metadata?.matches > 0
-            }
-          >
+          <Match when={props.state.metadata?.matches && props.state.metadata?.matches > 0}>
             <ResultsButton
-              showCopy={
-                props.state.metadata?.matches === 1
-                  ? "1 match"
-                  : `${props.state.metadata?.matches} matches`
-              }
+              showCopy={props.state.metadata?.matches === 1 ? "1 match" : `${props.state.metadata?.matches} matches`}
             >
               <ContentText expand compact text={props.state.output} />
             </ResultsButton>
           </Match>
           <Match when={props.state.output}>
-            <ContentText
-              expand
-              compact
-              text={props.state.output}
-              data-size="sm"
-              data-color="dimmed"
-            />
+            <ContentText expand compact text={props.state.output} data-size="sm" data-color="dimmed" />
           </Match>
         </Switch>
       </div>
@@ -592,10 +495,7 @@ export function WebFetchTool(props: ToolProps) {
           </Match>
           <Match when={props.state.output}>
             <ResultsButton>
-              <ContentCode
-                lang={props.state.input.format || "text"}
-                code={props.state.output}
-              />
+              <ContentCode lang={props.state.input.format || "text"} code={props.state.output} />
             </ResultsButton>
           </Match>
         </Switch>
@@ -605,9 +505,7 @@ export function WebFetchTool(props: ToolProps) {
 }
 
 export function ReadTool(props: ToolProps) {
-  const filePath = createMemo(() =>
-    stripWorkingDirectory(props.state.input?.filePath, props.message.path.cwd),
-  )
+  const filePath = createMemo(() => stripWorkingDirectory(props.state.input?.filePath, props.message.path.cwd))
 
   return (
     <>
@@ -624,18 +522,10 @@ export function ReadTool(props: ToolProps) {
           </Match>
           <Match when={typeof props.state.metadata?.preview === "string"}>
             <ResultsButton showCopy="Show preview" hideCopy="Hide preview">
-              <ContentCode
-                lang={getShikiLang(filePath() || "")}
-                code={props.state.metadata?.preview}
-              />
+              <ContentCode lang={getShikiLang(filePath() || "")} code={props.state.metadata?.preview} />
             </ResultsButton>
           </Match>
-          <Match
-            when={
-              typeof props.state.metadata?.preview !== "string" &&
-              props.state.output
-            }
-          >
+          <Match when={typeof props.state.metadata?.preview !== "string" && props.state.output}>
             <ResultsButton>
               <ContentText expand compact text={props.state.output} />
             </ResultsButton>
@@ -647,15 +537,8 @@ export function ReadTool(props: ToolProps) {
 }
 
 export function WriteTool(props: ToolProps) {
-  const filePath = createMemo(() =>
-    stripWorkingDirectory(props.state.input?.filePath, props.message.path.cwd),
-  )
-  const diagnostics = createMemo(() =>
-    getDiagnostics(
-      props.state.metadata?.diagnostics,
-      props.state.input.filePath,
-    ),
-  )
+  const filePath = createMemo(() => stripWorkingDirectory(props.state.input?.filePath, props.message.path.cwd))
+  const diagnostics = createMemo(() => getDiagnostics(props.state.metadata?.diagnostics, props.state.input.filePath))
 
   return (
     <>
@@ -675,10 +558,7 @@ export function WriteTool(props: ToolProps) {
           </Match>
           <Match when={props.state.input?.content}>
             <ResultsButton showCopy="Show contents" hideCopy="Hide contents">
-              <ContentCode
-                lang={getShikiLang(filePath() || "")}
-                code={props.state.input?.content}
-              />
+              <ContentCode lang={getShikiLang(filePath() || "")} code={props.state.input?.content} />
             </ResultsButton>
           </Match>
         </Switch>
@@ -688,15 +568,8 @@ export function WriteTool(props: ToolProps) {
 }
 
 export function EditTool(props: ToolProps) {
-  const filePath = createMemo(() =>
-    stripWorkingDirectory(props.state.input.filePath, props.message.path.cwd),
-  )
-  const diagnostics = createMemo(() =>
-    getDiagnostics(
-      props.state.metadata?.diagnostics,
-      props.state.input.filePath,
-    ),
-  )
+  const filePath = createMemo(() => stripWorkingDirectory(props.state.input.filePath, props.message.path.cwd))
+  const diagnostics = createMemo(() => getDiagnostics(props.state.metadata?.diagnostics, props.state.input.filePath))
 
   return (
     <>
@@ -709,16 +582,11 @@ export function EditTool(props: ToolProps) {
       <div data-component="tool-result">
         <Switch>
           <Match when={props.state.metadata?.error}>
-            <ContentError>
-              {formatErrorString(props.state.metadata?.message || "")}
-            </ContentError>
+            <ContentError>{formatErrorString(props.state.metadata?.message || "")}</ContentError>
           </Match>
           <Match when={props.state.metadata?.diff}>
             <div data-component="diff">
-              <ContentDiff
-                diff={props.state.metadata?.diff}
-                lang={getShikiLang(filePath() || "")}
-              />
+              <ContentDiff diff={props.state.metadata?.diff} lang={getShikiLang(filePath() || "")} />
             </div>
           </Match>
         </Switch>
@@ -745,33 +613,20 @@ export function GlobTool(props: ToolProps) {
     <>
       <div data-component="tool-title">
         <span data-slot="name">Glob</span>
-        <span data-slot="target">
-          &ldquo;{props.state.input.pattern}&rdquo;
-        </span>
+        <span data-slot="target">&ldquo;{props.state.input.pattern}&rdquo;</span>
       </div>
       <Switch>
-        <Match
-          when={props.state.metadata?.count && props.state.metadata?.count > 0}
-        >
+        <Match when={props.state.metadata?.count && props.state.metadata?.count > 0}>
           <div data-component="tool-result">
             <ResultsButton
-              showCopy={
-                props.state.metadata?.count === 1
-                  ? "1 result"
-                  : `${props.state.metadata?.count} results`
-              }
+              showCopy={props.state.metadata?.count === 1 ? "1 result" : `${props.state.metadata?.count} results`}
             >
               <ContentText expand compact text={props.state.output} />
             </ResultsButton>
           </div>
         </Match>
         <Match when={props.state.output}>
-          <ContentText
-            expand
-            text={props.state.output}
-            data-size="sm"
-            data-color="dimmed"
-          />
+          <ContentText expand text={props.state.output} data-size="sm" data-color="dimmed" />
         </Match>
       </Switch>
     </>
@@ -787,22 +642,10 @@ function ResultsButton(props: ResultsButtonProps) {
 
   return (
     <>
-      <button
-        type="button"
-        data-component="button-text"
-        data-more
-        onClick={() => setShow((e) => !e)}
-      >
-        <span>
-          {show()
-            ? props.hideCopy || "Hide results"
-            : props.showCopy || "Show results"}
-        </span>
+      <button type="button" data-component="button-text" data-more onClick={() => setShow((e) => !e)}>
+        <span>{show() ? props.hideCopy || "Hide results" : props.showCopy || "Show results"}</span>
         <span data-slot="icon">
-          <Show
-            when={show()}
-            fallback={<IconChevronRight width={11} height={11} />}
-          >
+          <Show when={show()} fallback={<IconChevronRight width={11} height={11} />}>
             <IconChevronDown width={11} height={11} />
           </Show>
         </span>
@@ -825,11 +668,7 @@ function Footer(props: ParentProps<{ title: string }>) {
 }
 
 function ToolFooter(props: { time: number }) {
-  return (
-    props.time > MIN_DURATION && (
-      <Footer title={`${props.time}ms`}>{formatDuration(props.time)}</Footer>
-    )
-  )
+  return props.time > MIN_DURATION && <Footer title={`${props.time}ms`}>{formatDuration(props.time)}</Footer>
 }
 
 function TaskTool(props: ToolProps) {
@@ -839,9 +678,7 @@ function TaskTool(props: ToolProps) {
         <span data-slot="name">Task</span>
         <span data-slot="target">{props.state.input.description}</span>
       </div>
-      <div data-component="tool-input">
-        &ldquo;{props.state.input.prompt}&rdquo;
-      </div>
+      <div data-component="tool-input">&ldquo;{props.state.input.prompt}&rdquo;</div>
       <ResultsButton showCopy="Show output" hideCopy="Hide output">
         <div data-component="tool-output">
           <ContentMarkdown expand text={props.state.output} />
@@ -872,13 +709,7 @@ export function FallbackTool(props: ToolProps) {
         <Match when={props.state.output}>
           <div data-component="tool-result">
             <ResultsButton>
-              <ContentText
-                expand
-                compact
-                text={props.state.output}
-                data-size="sm"
-                data-color="dimmed"
-              />
+              <ContentText expand compact text={props.state.output} data-size="sm" data-color="dimmed" />
             </ResultsButton>
           </div>
         </Match>

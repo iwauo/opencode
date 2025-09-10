@@ -160,10 +160,7 @@ try {
   if (isPullRequest()) {
     const prData = await fetchPR()
     // Local PR
-    if (
-      prData.headRepository.nameWithOwner ===
-      prData.baseRepository.nameWithOwner
-    ) {
+    if (prData.headRepository.nameWithOwner === prData.baseRepository.nameWithOwner) {
       await checkoutLocalBranch(prData)
       const dataPrompt = buildPromptDataForPR(prData)
       const response = await chat(`${userPrompt}\n\n${dataPrompt}`, promptFiles)
@@ -171,9 +168,7 @@ try {
         const summary = await summarize(response)
         await pushToLocalBranch(summary)
       }
-      const hasShared = prData.comments.nodes.some((c) =>
-        c.body.includes(`${useShareUrl()}/s/${shareId}`),
-      )
+      const hasShared = prData.comments.nodes.some((c) => c.body.includes(`${useShareUrl()}/s/${shareId}`))
       await updateComment(`${response}${footer({ image: !hasShared })}`)
     }
     // Fork PR
@@ -185,9 +180,7 @@ try {
         const summary = await summarize(response)
         await pushToForkBranch(summary, prData)
       }
-      const hasShared = prData.comments.nodes.some((c) =>
-        c.body.includes(`${useShareUrl()}/s/${shareId}`),
-      )
+      const hasShared = prData.comments.nodes.some((c) => c.body.includes(`${useShareUrl()}/s/${shareId}`))
       await updateComment(`${response}${footer({ image: !hasShared })}`)
     }
   }
@@ -235,11 +228,7 @@ function createOpencode() {
   const host = "127.0.0.1"
   const port = 4096
   const url = `http://${host}:${port}`
-  const proc = spawn(`opencode`, [
-    `serve`,
-    `--hostname=${host}`,
-    `--port=${port}`,
-  ])
+  const proc = spawn(`opencode`, [`serve`, `--hostname=${host}`, `--port=${port}`])
   const client = createOpencodeClient({ baseUrl: url })
 
   return {
@@ -289,9 +278,7 @@ function useEnvModel() {
   const modelID = rest.join("/")
 
   if (!providerID?.length || !modelID.length)
-    throw new Error(
-      `Invalid model ${value}. Model must be in the format "provider/model".`,
-    )
+    throw new Error(`Invalid model ${value}. Model must be in the format "provider/model".`)
   return { providerID, modelID }
 }
 
@@ -335,9 +322,7 @@ function isPullRequest() {
 }
 
 function useContext() {
-  return isMock()
-    ? (JSON.parse(useEnvMock().mockEvent!) as GitHubContext)
-    : github.context
+  return isMock() ? (JSON.parse(useEnvMock().mockEvent!) as GitHubContext) : github.context
 }
 
 function useIssueId() {
@@ -357,34 +342,26 @@ async function getAccessToken() {
 
   let response
   if (isMock()) {
-    response = await fetch(
-      "https://api.opencode.ai/exchange_github_app_token_with_pat",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${useEnvMock().mockToken}`,
-        },
-        body: JSON.stringify({ owner: repo.owner, repo: repo.repo }),
+    response = await fetch("https://api.opencode.ai/exchange_github_app_token_with_pat", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${useEnvMock().mockToken}`,
       },
-    )
+      body: JSON.stringify({ owner: repo.owner, repo: repo.repo }),
+    })
   } else {
     const oidcToken = await core.getIDToken("opencode-github-action")
-    response = await fetch(
-      "https://api.opencode.ai/exchange_github_app_token",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${oidcToken}`,
-        },
+    response = await fetch("https://api.opencode.ai/exchange_github_app_token", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${oidcToken}`,
       },
-    )
+    })
   }
 
   if (!response.ok) {
     const responseJson = (await response.json()) as { error?: string }
-    throw new Error(
-      `App token exchange failed: ${response.status} ${response.statusText} - ${responseJson.error}`,
-    )
+    throw new Error(`App token exchange failed: ${response.status} ${response.statusText} - ${responseJson.error}`)
   }
 
   const responseJson = (await response.json()) as { token: string }
@@ -425,15 +402,9 @@ async function getUserPrompt() {
   // ie. <img alt="Image" src="https://github.com/user-attachments/assets/xxxx" />
   // ie. [api.json](https://github.com/user-attachments/files/21433810/api.json)
   // ie. ![Image](https://github.com/user-attachments/assets/xxxx)
-  const mdMatches = prompt.matchAll(
-    /!?\[.*?\]\((https:\/\/github\.com\/user-attachments\/[^)]+)\)/gi,
-  )
-  const tagMatches = prompt.matchAll(
-    /<img .*?src="(https:\/\/github\.com\/user-attachments\/[^"]+)" \/>/gi,
-  )
-  const matches = [...mdMatches, ...tagMatches].sort(
-    (a, b) => a.index - b.index,
-  )
+  const mdMatches = prompt.matchAll(/!?\[.*?\]\((https:\/\/github\.com\/user-attachments\/[^)]+)\)/gi)
+  const tagMatches = prompt.matchAll(/<img .*?src="(https:\/\/github\.com\/user-attachments\/[^"]+)" \/>/gi)
+  const matches = [...mdMatches, ...tagMatches].sort((a, b) => a.index - b.index)
   console.log("Images", JSON.stringify(matches, null, 2))
 
   let offset = 0
@@ -459,10 +430,7 @@ async function getUserPrompt() {
 
     // Replace img tag with file path, ie. @image.png
     const replacement = `@${filename}`
-    prompt =
-      prompt.slice(0, start + offset) +
-      replacement +
-      prompt.slice(start + offset + tag.length)
+    prompt = prompt.slice(0, start + offset) + replacement + prompt.slice(start + offset + tag.length)
     offset += replacement.length - tag.length
 
     const contentType = res.headers.get("content-type")
@@ -524,21 +492,13 @@ async function subscribeSessionEvents() {
               const part = evt.properties.part
 
               if (part.type === "tool" && part.state.status === "completed") {
-                const [tool, color] = TOOL[part.tool] ?? [
-                  part.tool,
-                  "\x1b[34m\x1b[1m",
-                ]
+                const [tool, color] = TOOL[part.tool] ?? [part.tool, "\x1b[34m\x1b[1m"]
                 const title =
                   part.state.title || Object.keys(part.state.input).length > 0
                     ? JSON.stringify(part.state.input)
                     : "Unknown"
                 console.log()
-                console.log(
-                  color + `|`,
-                  "\x1b[0m\x1b[2m" + ` ${tool.padEnd(7, " ")}`,
-                  "",
-                  "\x1b[0m" + title,
-                )
+                console.log(color + `|`, "\x1b[0m\x1b[2m" + ` ${tool.padEnd(7, " ")}`, "", "\x1b[0m" + title)
               }
 
               if (part.type === "text") {
@@ -572,9 +532,7 @@ async function subscribeSessionEvents() {
 async function summarize(response: string) {
   const payload = useContext().payload as IssueCommentEvent
   try {
-    return await chat(
-      `Summarize the following in less than 40 characters:\n\n${response}`,
-    )
+    return await chat(`Summarize the following in less than 40 characters:\n\n${response}`)
   } catch (e) {
     return `Fix issue: ${payload.issue.title}`
   }
@@ -632,10 +590,7 @@ async function configureGit(appToken: string) {
   const ret = await $`git config --local --get ${config}`
   gitConfig = ret.stdout.toString().trim()
 
-  const newCredentials = Buffer.from(
-    `x-access-token:${appToken}`,
-    "utf8",
-  ).toString("base64")
+  const newCredentials = Buffer.from(`x-access-token:${appToken}`, "utf8").toString("base64")
 
   await $`git config --local --unset-all ${config}`
   await $`git config --local ${config} "AUTHORIZATION: basic ${newCredentials}"`
@@ -755,8 +710,7 @@ async function assertPermissions() {
     throw new Error(`Failed to check permissions for user ${actor}: ${error}`)
   }
 
-  if (!["admin", "write"].includes(permission))
-    throw new Error(`User ${actor} does not have write permissions`)
+  if (!["admin", "write"].includes(permission)) throw new Error(`User ${actor} does not have write permissions`)
 }
 
 async function updateComment(body: string) {
@@ -773,12 +727,7 @@ async function updateComment(body: string) {
   })
 }
 
-async function createPR(
-  base: string,
-  branch: string,
-  title: string,
-  body: string,
-) {
+async function createPR(base: string, branch: string, title: string, body: string) {
   console.log("Creating pull request...")
   const { repo } = useContext()
   const pr = await octoRest.rest.pulls.create({
@@ -800,16 +749,11 @@ function footer(opts?: { image?: boolean }) {
     if (!opts?.image) return ""
 
     const titleAlt = encodeURIComponent(session.title.substring(0, 50))
-    const title64 = Buffer.from(
-      session.title.substring(0, 700),
-      "utf8",
-    ).toString("base64")
+    const title64 = Buffer.from(session.title.substring(0, 700), "utf8").toString("base64")
 
     return `<a href="${useShareUrl()}/s/${shareId}"><img width="200" alt="${titleAlt}" src="https://social-cards.sst.dev/opencode-share/${title64}.png?model=${providerID}/${modelID}&version=${session.version}&id=${shareId}" /></a>\n`
   })()
-  const shareUrl = shareId
-    ? `[opencode session](${useShareUrl()}/s/${shareId})&nbsp;&nbsp;|&nbsp;&nbsp;`
-    : ""
+  const shareUrl = shareId ? `[opencode session](${useShareUrl()}/s/${shareId})&nbsp;&nbsp;|&nbsp;&nbsp;` : ""
   return `\n\n${image}${shareUrl}[github run](${useEnvRunUrl()})`
 }
 
@@ -878,9 +822,7 @@ function buildPromptDataForIssue(issue: GitHubIssue) {
     `Author: ${issue.author.login}`,
     `Created At: ${issue.createdAt}`,
     `State: ${issue.state}`,
-    ...(comments.length > 0
-      ? ["<issue_comments>", ...comments, "</issue_comments>"]
-      : []),
+    ...(comments.length > 0 ? ["<issue_comments>", ...comments, "</issue_comments>"] : []),
     "</issue>",
   ].join("\n")
 }
@@ -994,13 +936,9 @@ function buildPromptDataForPR(pr: GitHubPullRequest) {
     })
     .map((c) => `- ${c.author.login} at ${c.createdAt}: ${c.body}`)
 
-  const files = (pr.files.nodes || []).map(
-    (f) => `- ${f.path} (${f.changeType}) +${f.additions}/-${f.deletions}`,
-  )
+  const files = (pr.files.nodes || []).map((f) => `- ${f.path} (${f.changeType}) +${f.additions}/-${f.deletions}`)
   const reviewData = (pr.reviews.nodes || []).map((r) => {
-    const comments = (r.comments.nodes || []).map(
-      (c) => `    - ${c.path}:${c.line ?? "?"}: ${c.body}`,
-    )
+    const comments = (r.comments.nodes || []).map((c) => `    - ${c.path}:${c.line ?? "?"}: ${c.body}`)
     return [
       `- ${r.author.login} at ${r.submittedAt}:`,
       `  - Review body: ${r.body}`,
@@ -1022,19 +960,9 @@ function buildPromptDataForPR(pr: GitHubPullRequest) {
     `Deletions: ${pr.deletions}`,
     `Total Commits: ${pr.commits.totalCount}`,
     `Changed Files: ${pr.files.nodes.length} files`,
-    ...(comments.length > 0
-      ? ["<pull_request_comments>", ...comments, "</pull_request_comments>"]
-      : []),
-    ...(files.length > 0
-      ? [
-          "<pull_request_changed_files>",
-          ...files,
-          "</pull_request_changed_files>",
-        ]
-      : []),
-    ...(reviewData.length > 0
-      ? ["<pull_request_reviews>", ...reviewData, "</pull_request_reviews>"]
-      : []),
+    ...(comments.length > 0 ? ["<pull_request_comments>", ...comments, "</pull_request_comments>"] : []),
+    ...(files.length > 0 ? ["<pull_request_changed_files>", ...files, "</pull_request_changed_files>"] : []),
+    ...(reviewData.length > 0 ? ["<pull_request_reviews>", ...reviewData, "</pull_request_reviews>"] : []),
     "</pull_request>",
   ].join("\n")
 }

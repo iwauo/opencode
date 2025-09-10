@@ -1,9 +1,5 @@
 export namespace Binary {
-  export function search<T>(
-    array: T[],
-    id: string,
-    compare: (item: T) => string,
-  ): { found: boolean; index: number } {
+  export function search<T>(array: T[], id: string, compare: (item: T) => string): { found: boolean; index: number } {
     let left = 0
     let right = array.length - 1
 
@@ -23,11 +19,7 @@ export namespace Binary {
     return { found: false, index: left }
   }
 
-  export function insert<T>(
-    array: T[],
-    item: T,
-    compare: (item: T) => string,
-  ): T[] {
+  export function insert<T>(array: T[], item: T, compare: (item: T) => string): T[] {
     const id = compare(item)
     let left = 0
     let right = array.length

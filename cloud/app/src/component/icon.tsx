@@ -2,20 +2,9 @@ import { JSX } from "solid-js"
 
 export function IconLogo(props: JSX.SvgSVGAttributes<SVGSVGElement>) {
   return (
-    <svg
-      {...props}
-      viewBox="0 0 289 50"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M264.5 0H288.5V8.5H272.5V16.5H288.5V25H272.5V33H288.5V41.5H264.5V0Z"
-        fill="currentColor"
-      />
-      <path
-        d="M248.5 0H224.5V41.5H248.5V33H232.5V8.5H248.5V0Z"
-        fill="currentColor"
-      />
+    <svg {...props} viewBox="0 0 289 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M264.5 0H288.5V8.5H272.5V16.5H288.5V25H272.5V33H288.5V41.5H264.5V0Z" fill="currentColor" />
+      <path d="M248.5 0H224.5V41.5H248.5V33H232.5V8.5H248.5V0Z" fill="currentColor" />
       <path d="M256.5 8.5H248.5V33H256.5V8.5Z" fill="currentColor" />
       <path
         fill-rule="evenodd"

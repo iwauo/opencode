@@ -1,10 +1,7 @@
 import { Billing } from "@opencode/cloud-core/billing.js"
 import type { APIEvent } from "@solidjs/start/server"
 import { Database, eq, sql } from "@opencode/cloud-core/drizzle/index.js"
-import {
-  BillingTable,
-  PaymentTable,
-} from "@opencode/cloud-core/schema/billing.sql.js"
+import { BillingTable, PaymentTable } from "@opencode/cloud-core/schema/billing.sql.js"
 import { Identifier } from "@opencode/cloud-core/identifier.js"
 import { centsToMicroCents } from "@opencode/cloud-core/util/price.js"
 import { Actor } from "@opencode/cloud-core/actor.js"
@@ -33,8 +30,7 @@ export async function POST(input: APIEvent) {
 
     await Actor.provide("system", { workspaceID }, async () => {
       const customer = await Billing.get()
-      if (customer?.customerID && customer.customerID !== customerID)
-        throw new Error("Customer ID mismatch")
+      if (customer?.customerID && customer.customerID !== customerID) throw new Error("Customer ID mismatch")
 
       // set customer metadata
       if (!customer?.customerID) {
@@ -46,15 +42,11 @@ export async function POST(input: APIEvent) {
       }
 
       // get payment method for the payment intent
-      const paymentIntent = await Billing.stripe().paymentIntents.retrieve(
-        paymentID,
-        {
-          expand: ["payment_method"],
-        },
-      )
+      const paymentIntent = await Billing.stripe().paymentIntents.retrieve(paymentID, {
+        expand: ["payment_method"],
+      })
       const paymentMethod = paymentIntent.payment_method
-      if (!paymentMethod || typeof paymentMethod === "string")
-        throw new Error("Payment method not expanded")
+      if (!paymentMethod || typeof paymentMethod === "string") throw new Error("Payment method not expanded")
 
       await Database.transaction(async (tx) => {
         await tx

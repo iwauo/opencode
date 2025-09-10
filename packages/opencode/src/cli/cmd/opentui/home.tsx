@@ -26,8 +26,8 @@ export function Home() {
 function HelpRow(props: { children: string; slash: string }) {
   return (
     <text>
-      {bold(fg(Theme.primary)("/" + props.slash.padEnd(10, " ")))}{" "}
-      {props.children.padEnd(15, " ")} {fg(Theme.textMuted)("ctrl+x n")}
+      {bold(fg(Theme.primary)("/" + props.slash.padEnd(10, " ")))} {props.children.padEnd(15, " ")}{" "}
+      {fg(Theme.textMuted)("ctrl+x n")}
     </text>
   )
 }

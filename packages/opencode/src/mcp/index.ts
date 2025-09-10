@@ -57,8 +57,7 @@ export namespace MCP {
               name: "opencode",
               transport,
             }).catch((error) => {
-              lastError =
-                error instanceof Error ? error : new Error(String(error))
+              lastError = error instanceof Error ? error : new Error(String(error))
               log.debug("transport connection failed", {
                 key,
                 transport: name,

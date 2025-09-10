@@ -8,10 +8,7 @@ export type ShellExpression =
   | ReadableStream
 
 export interface BunShell {
-  (
-    strings: TemplateStringsArray,
-    ...expressions: ShellExpression[]
-  ): BunShellPromise
+  (strings: TemplateStringsArray, ...expressions: ShellExpression[]): BunShellPromise
 
   /**
    * Perform bash-like brace expansion on the given pattern.

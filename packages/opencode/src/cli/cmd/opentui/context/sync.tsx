@@ -1,12 +1,4 @@
-import type {
-  Message,
-  Agent,
-  Provider,
-  Session,
-  Part,
-  Config,
-  Todo,
-} from "@opencode-ai/sdk"
+import type { Message, Agent, Provider, Session, Part, Config, Todo } from "@opencode-ai/sdk"
 import { createStore, produce, reconcile } from "solid-js/store"
 import { useSDK } from "./sdk"
 import { createContext, Show, useContext, type ParentProps } from "solid-js"
@@ -49,11 +41,7 @@ function init() {
           setStore("todo", event.properties.sessionID, event.properties.todos)
           break
         case "session.updated":
-          const result = Binary.search(
-            store.session,
-            event.properties.info.id,
-            (s) => s.id,
-          )
+          const result = Binary.search(store.session, event.properties.info.id, (s) => s.id)
           setStore("session", result.index, reconcile(event.properties.info))
           break
         case "message.updated":
@@ -61,11 +49,7 @@ function init() {
             "message",
             produce((draft) => {
               const messages = (draft[event.properties.info.sessionID] ??= [])
-              const result = Binary.search(
-                messages,
-                event.properties.info.id,
-                (m) => m.id,
-              )
+              const result = Binary.search(messages, event.properties.info.id, (m) => m.id)
               if (result.found) {
                 messages[result.index] = event.properties.info
                 return
@@ -79,11 +63,7 @@ function init() {
             "part",
             produce((draft) => {
               const parts = (draft[event.properties.part.messageID] ??= [])
-              const result = Binary.search(
-                parts,
-                event.properties.part.id,
-                (p) => p.id,
-              )
+              const result = Binary.search(parts, event.properties.part.id, (p) => p.id)
               if (result.found) {
                 parts[result.index] = event.properties.part
                 return

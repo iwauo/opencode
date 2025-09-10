@@ -12,10 +12,7 @@ export namespace Identifier {
     workspace: "wrk",
   } as const
 
-  export function create(
-    prefix: keyof typeof prefixes,
-    given?: string,
-  ): string {
+  export function create(prefix: keyof typeof prefixes, given?: string): string {
     if (given) {
       if (given.startsWith(prefixes[prefix])) return given
       throw new Error(`ID ${given} does not start with ${prefixes[prefix]}`)

@@ -57,12 +57,8 @@ export function displayStats(stats: SessionStats) {
   console.log(renderRow("Cost/Day", `$${costPerDay.toFixed(2)}`))
   console.log(renderRow("Input", formatNumber(stats.totalTokens.input)))
   console.log(renderRow("Output", formatNumber(stats.totalTokens.output)))
-  console.log(
-    renderRow("Cache Read", formatNumber(stats.totalTokens.cache.read)),
-  )
-  console.log(
-    renderRow("Cache Write", formatNumber(stats.totalTokens.cache.write)),
-  )
+  console.log(renderRow("Cache Read", formatNumber(stats.totalTokens.cache.read)))
+  console.log(renderRow("Cache Write", formatNumber(stats.totalTokens.cache.write)))
   console.log("└────────────────────────────────────────────────────────┘")
   console.log()
 
@@ -77,10 +73,7 @@ export function displayStats(stats: SessionStats) {
     console.log("├────────────────────────────────────────────────────────┤")
 
     const maxCount = Math.max(...sortedTools.map(([, count]) => count))
-    const totalToolUsage = Object.values(stats.toolUsage).reduce(
-      (a, b) => a + b,
-      0,
-    )
+    const totalToolUsage = Object.values(stats.toolUsage).reduce((a, b) => a + b, 0)
 
     for (const [tool, count] of sortedTools) {
       const barLength = Math.max(1, Math.floor((count / maxCount) * 20))

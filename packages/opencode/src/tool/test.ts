@@ -7,21 +7,15 @@ const parser = async () => {
     return p
   } catch (e) {
     const { default: Parser } = await import("web-tree-sitter")
-    const { default: treeWasm } = await import(
-      "web-tree-sitter/tree-sitter.wasm" as string,
-      { with: { type: "wasm" } }
-    )
+    const { default: treeWasm } = await import("web-tree-sitter/tree-sitter.wasm" as string, { with: { type: "wasm" } })
     await Parser.init({
       locateFile() {
         return treeWasm
       },
     })
-    const { default: bashWasm } = await import(
-      "tree-sitter-bash/tree-sitter-bash.wasm" as string,
-      {
-        with: { type: "wasm" },
-      }
-    )
+    const { default: bashWasm } = await import("tree-sitter-bash/tree-sitter-bash.wasm" as string, {
+      with: { type: "wasm" },
+    })
     const bashLanguage = await Parser.Language.load(bashWasm)
     const p = new Parser()
     p.setLanguage(bashLanguage)
@@ -34,9 +28,7 @@ const sourceCode = `cd --foo foo/bar && echo "hello" && cd ../baz`
 const tree = await parser().then((p) => p.parse(sourceCode))
 
 // Function to extract commands and arguments
-function extractCommands(
-  node: any,
-): Array<{ command: string; args: string[] }> {
+function extractCommands(node: any): Array<{ command: string; args: string[] }> {
   const commands: Array<{ command: string; args: string[] }> = []
 
   function traverse(node: any) {

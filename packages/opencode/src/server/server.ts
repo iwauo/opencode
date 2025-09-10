@@ -87,12 +87,9 @@ export namespace Server {
           status: 400,
         })
       }
-      return c.json(
-        new NamedError.Unknown({ message: err.toString() }).toObject(),
-        {
-          status: 400,
-        },
-      )
+      return c.json(new NamedError.Unknown({ message: err.toString() }).toObject(), {
+        status: 400,
+      })
     })
     .use(async (c, next) => {
       const skipLogging = c.req.path === "/log"
@@ -221,17 +218,14 @@ export namespace Server {
     .get(
       "/experimental/tool/ids",
       describeRoute({
-        description:
-          "List all tool IDs (including built-in and dynamically registered)",
+        description: "List all tool IDs (including built-in and dynamically registered)",
         operationId: "tool.ids",
         responses: {
           200: {
             description: "Tool IDs",
             content: {
               "application/json": {
-                schema: resolver(
-                  z.array(z.string()).openapi({ ref: "ToolIDs" }),
-                ),
+                schema: resolver(z.array(z.string()).openapi({ ref: "ToolIDs" })),
               },
             },
           },
@@ -245,8 +239,7 @@ export namespace Server {
     .get(
       "/experimental/tool",
       describeRoute({
-        description:
-          "List tools with JSON schema parameters for a provider/model",
+        description: "List tools with JSON schema parameters for a provider/model",
         operationId: "tool.list",
         responses: {
           200: {
@@ -287,9 +280,7 @@ export namespace Server {
             id: t.id,
             description: t.description,
             // Handle both Zod schemas and plain JSON schemas
-            parameters: (t.parameters as any)?._def
-              ? zodToJsonSchema(t.parameters as any)
-              : t.parameters,
+            parameters: (t.parameters as any)?._def ? zodToJsonSchema(t.parameters as any) : t.parameters,
           })),
         )
       },
@@ -1000,15 +991,10 @@ export namespace Server {
         },
       }),
       async (c) => {
-        const providers = await Provider.list().then((x) =>
-          mapValues(x, (item) => item.info),
-        )
+        const providers = await Provider.list().then((x) => mapValues(x, (item) => item.info))
         return c.json({
           providers: Object.values(providers),
-          default: mapValues(
-            providers,
-            (item) => Provider.sort(Object.values(item.models))[0].id,
-          ),
+          default: mapValues(providers, (item) => Provider.sort(Object.values(item.models))[0].id),
         })
       },
     )
@@ -1200,12 +1186,8 @@ export namespace Server {
       zValidator(
         "json",
         z.object({
-          service: z
-            .string()
-            .openapi({ description: "Service name for the log entry" }),
-          level: z
-            .enum(["debug", "info", "error", "warn"])
-            .openapi({ description: "Log level" }),
+          service: z.string().openapi({ description: "Service name for the log entry" }),
+          level: z.enum(["debug", "info", "error", "warn"]).openapi({ description: "Log level" }),
           message: z.string().openapi({ description: "Log message" }),
           extra: z
             .record(z.string(), z.any())

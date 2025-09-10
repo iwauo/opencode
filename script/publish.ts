@@ -28,9 +28,7 @@ const pkgjsons = await Array.fromAsync(
   new Bun.Glob("**/package.json").scan({
     absolute: true,
   }),
-).then((arr) =>
-  arr.filter((x) => !x.includes("node_modules") && !x.includes("dist")),
-)
+).then((arr) => arr.filter((x) => !x.includes("node_modules") && !x.includes("dist")))
 
 const tree = await $`git add . && git write-tree`.text().then((x) => x.trim())
 for (const file of pkgjsons) {
@@ -60,9 +58,7 @@ if (!snapshot) {
   await $`git cherry-pick HEAD..origin/dev`.nothrow()
   await $`git push origin HEAD --tags --no-verify --force`
 
-  const previous = await fetch(
-    "https://api.github.com/repos/sst/opencode/releases/latest",
-  )
+  const previous = await fetch("https://api.github.com/repos/sst/opencode/releases/latest")
     .then((res) => {
       if (!res.ok) throw new Error(res.statusText)
       return res.json()
@@ -70,15 +66,11 @@ if (!snapshot) {
     .then((data) => data.tag_name)
 
   console.log("finding commits between", previous, "and", "HEAD")
-  const commits = await fetch(
-    `https://api.github.com/repos/sst/opencode/compare/${previous}...HEAD`,
-  )
+  const commits = await fetch(`https://api.github.com/repos/sst/opencode/compare/${previous}...HEAD`)
     .then((res) => res.json())
     .then((data) => data.commits || [])
 
-  const raw = commits.map(
-    (commit: any) => `- ${commit.commit.message.split("\n").join(" ")}`,
-  )
+  const raw = commits.map((commit: any) => `- ${commit.commit.message.split("\n").join(" ")}`)
   console.log(raw)
 
   const notes =

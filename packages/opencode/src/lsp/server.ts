@@ -46,22 +46,15 @@ export namespace LSPServer {
     root: NearestRoot(["tsconfig.json", "package.json", "jsconfig.json"]),
     extensions: [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".mts", ".cts"],
     async spawn(root) {
-      const tsserver = await Bun.resolve(
-        "typescript/lib/tsserver.js",
-        Instance.directory,
-      ).catch(() => {})
+      const tsserver = await Bun.resolve("typescript/lib/tsserver.js", Instance.directory).catch(() => {})
       if (!tsserver) return
-      const proc = spawn(
-        BunProc.which(),
-        ["x", "typescript-language-server", "--stdio"],
-        {
-          cwd: root,
-          env: {
-            ...process.env,
-            BUN_BE_BUN: "1",
-          },
+      const proc = spawn(BunProc.which(), ["x", "typescript-language-server", "--stdio"], {
+        cwd: root,
+        env: {
+          ...process.env,
+          BUN_BE_BUN: "1",
         },
-      )
+      })
       return {
         process: proc,
         initialization: {
@@ -104,19 +97,16 @@ export namespace LSPServer {
         )
         if (!(await Bun.file(js).exists())) {
           if (Flag.OPENCODE_DISABLE_LSP_DOWNLOAD) return
-          await Bun.spawn(
-            [BunProc.which(), "install", "@vue/language-server"],
-            {
-              cwd: Global.Path.bin,
-              env: {
-                ...process.env,
-                BUN_BE_BUN: "1",
-              },
-              stdout: "pipe",
-              stderr: "pipe",
-              stdin: "pipe",
+          await Bun.spawn([BunProc.which(), "install", "@vue/language-server"], {
+            cwd: Global.Path.bin,
+            env: {
+              ...process.env,
+              BUN_BE_BUN: "1",
             },
-          ).exited
+            stdout: "pipe",
+            stderr: "pipe",
+            stdin: "pipe",
+          }).exited
         }
         binary = BunProc.which()
         args.push("run", js)
@@ -154,36 +144,16 @@ export namespace LSPServer {
       ".eslintrc.json",
       "package.json",
     ]),
-    extensions: [
-      ".ts",
-      ".tsx",
-      ".js",
-      ".jsx",
-      ".mjs",
-      ".cjs",
-      ".mts",
-      ".cts",
-      ".vue",
-    ],
+    extensions: [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".mts", ".cts", ".vue"],
     async spawn(root) {
-      const eslint = await Bun.resolve("eslint", Instance.directory).catch(
-        () => {},
-      )
+      const eslint = await Bun.resolve("eslint", Instance.directory).catch(() => {})
       if (!eslint) return
       log.info("spawning eslint server")
-      const serverPath = path.join(
-        Global.Path.bin,
-        "vscode-eslint",
-        "server",
-        "out",
-        "eslintServer.js",
-      )
+      const serverPath = path.join(Global.Path.bin, "vscode-eslint", "server", "out", "eslintServer.js")
       if (!(await Bun.file(serverPath).exists())) {
         if (Flag.OPENCODE_DISABLE_LSP_DOWNLOAD) return
         log.info("downloading and building VS Code ESLint server")
-        const response = await fetch(
-          "https://github.com/microsoft/vscode-eslint/archive/refs/heads/main.zip",
-        )
+        const response = await fetch("https://github.com/microsoft/vscode-eslint/archive/refs/heads/main.zip")
         if (!response.ok) return
 
         const zipPath = path.join(Global.Path.bin, "vscode-eslint.zip")
@@ -208,17 +178,13 @@ export namespace LSPServer {
         log.info("installed VS Code ESLint server", { serverPath })
       }
 
-      const proc = spawn(
-        BunProc.which(),
-        ["--max-old-space-size=8192", serverPath, "--stdio"],
-        {
-          cwd: root,
-          env: {
-            ...process.env,
-            BUN_BE_BUN: "1",
-          },
+      const proc = spawn(BunProc.which(), ["--max-old-space-size=8192", serverPath, "--stdio"], {
+        cwd: root,
+        env: {
+          ...process.env,
+          BUN_BE_BUN: "1",
         },
-      )
+      })
 
       return {
         process: proc,
@@ -255,10 +221,7 @@ export namespace LSPServer {
           log.error("Failed to install gopls")
           return
         }
-        bin = path.join(
-          Global.Path.bin,
-          "gopls" + (process.platform === "win32" ? ".exe" : ""),
-        )
+        bin = path.join(Global.Path.bin, "gopls" + (process.platform === "win32" ? ".exe" : ""))
         log.info(`installed gopls`, {
           bin,
         })
@@ -299,10 +262,7 @@ export namespace LSPServer {
           log.error("Failed to install ruby-lsp")
           return
         }
-        bin = path.join(
-          Global.Path.bin,
-          "ruby-lsp" + (process.platform === "win32" ? ".exe" : ""),
-        )
+        bin = path.join(Global.Path.bin, "ruby-lsp" + (process.platform === "win32" ? ".exe" : ""))
         log.info(`installed ruby-lsp`, {
           bin,
         })
@@ -318,25 +278,12 @@ export namespace LSPServer {
   export const Pyright: Info = {
     id: "pyright",
     extensions: [".py", ".pyi"],
-    root: NearestRoot([
-      "pyproject.toml",
-      "setup.py",
-      "setup.cfg",
-      "requirements.txt",
-      "Pipfile",
-      "pyrightconfig.json",
-    ]),
+    root: NearestRoot(["pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", "pyrightconfig.json"]),
     async spawn(root) {
       let binary = Bun.which("pyright-langserver")
       const args = []
       if (!binary) {
-        const js = path.join(
-          Global.Path.bin,
-          "node_modules",
-          "pyright",
-          "dist",
-          "pyright-langserver.js",
-        )
+        const js = path.join(Global.Path.bin, "node_modules", "pyright", "dist", "pyright-langserver.js")
         if (!(await Bun.file(js).exists())) {
           if (Flag.OPENCODE_DISABLE_LSP_DOWNLOAD) return
           await Bun.spawn([BunProc.which(), "install", "pyright"], {
@@ -354,11 +301,9 @@ export namespace LSPServer {
 
       const initialization: Record<string, string> = {}
 
-      const potentialVenvPaths = [
-        process.env["VIRTUAL_ENV"],
-        path.join(root, ".venv"),
-        path.join(root, "venv"),
-      ].filter((p): p is string => p !== undefined)
+      const potentialVenvPaths = [process.env["VIRTUAL_ENV"], path.join(root, ".venv"), path.join(root, "venv")].filter(
+        (p): p is string => p !== undefined,
+      )
       for (const venvPath of potentialVenvPaths) {
         const isWindows = process.platform === "win32"
         const potentialPythonPath = isWindows
@@ -396,9 +341,7 @@ export namespace LSPServer {
           Global.Path.bin,
           "elixir-ls-master",
           "release",
-          process.platform === "win32"
-            ? "language_server.bar"
-            : "language_server.sh",
+          process.platform === "win32" ? "language_server.bar" : "language_server.sh",
         )
 
         if (!(await Bun.file(binary).exists())) {
@@ -411,9 +354,7 @@ export namespace LSPServer {
           if (Flag.OPENCODE_DISABLE_LSP_DOWNLOAD) return
           log.info("downloading elixir-ls from GitHub releases")
 
-          const response = await fetch(
-            "https://github.com/elixir-lsp/elixir-ls/archive/refs/heads/master.zip",
-          )
+          const response = await fetch("https://github.com/elixir-lsp/elixir-ls/archive/refs/heads/master.zip")
           if (!response.ok) return
           const zipPath = path.join(Global.Path.bin, "elixir-ls.zip")
           await Bun.file(zipPath).write(response)
@@ -463,9 +404,7 @@ export namespace LSPServer {
         if (Flag.OPENCODE_DISABLE_LSP_DOWNLOAD) return
         log.info("downloading zls from GitHub releases")
 
-        const releaseResponse = await fetch(
-          "https://api.github.com/repos/zigtools/zls/releases/latest",
-        )
+        const releaseResponse = await fetch("https://api.github.com/repos/zigtools/zls/releases/latest")
         if (!releaseResponse.ok) {
           log.error("Failed to fetch zls release info")
           return
@@ -502,9 +441,7 @@ export namespace LSPServer {
         ]
 
         if (!supportedCombos.includes(assetName)) {
-          log.error(
-            `Platform ${platform} and architecture ${arch} is not supported by zls`,
-          )
+          log.error(`Platform ${platform} and architecture ${arch} is not supported by zls`)
           return
         }
 
@@ -525,20 +462,14 @@ export namespace LSPServer {
         await Bun.file(tempPath).write(downloadResponse)
 
         if (ext === "zip") {
-          await $`unzip -o -q ${tempPath}`
-            .quiet()
-            .cwd(Global.Path.bin)
-            .nothrow()
+          await $`unzip -o -q ${tempPath}`.quiet().cwd(Global.Path.bin).nothrow()
         } else {
           await $`tar -xf ${tempPath}`.cwd(Global.Path.bin).nothrow()
         }
 
         await fs.rm(tempPath, { force: true })
 
-        bin = path.join(
-          Global.Path.bin,
-          "zls" + (platform === "win32" ? ".exe" : ""),
-        )
+        bin = path.join(Global.Path.bin, "zls" + (platform === "win32" ? ".exe" : ""))
 
         if (!(await Bun.file(bin).exists())) {
           log.error("Failed to extract zls binary")
@@ -577,14 +508,7 @@ export namespace LSPServer {
         if (Flag.OPENCODE_DISABLE_LSP_DOWNLOAD) return
         log.info("installing csharp-ls via dotnet tool")
         const proc = Bun.spawn({
-          cmd: [
-            "dotnet",
-            "tool",
-            "install",
-            "csharp-ls",
-            "--tool-path",
-            Global.Path.bin,
-          ],
+          cmd: ["dotnet", "tool", "install", "csharp-ls", "--tool-path", Global.Path.bin],
           stdout: "pipe",
           stderr: "pipe",
           stdin: "pipe",
@@ -595,10 +519,7 @@ export namespace LSPServer {
           return
         }
 
-        bin = path.join(
-          Global.Path.bin,
-          "csharp-ls" + (process.platform === "win32" ? ".exe" : ""),
-        )
+        bin = path.join(Global.Path.bin, "csharp-ls" + (process.platform === "win32" ? ".exe" : ""))
         log.info(`installed csharp-ls`, { bin })
       }
 
@@ -658,25 +579,8 @@ export namespace LSPServer {
 
   export const Clangd: Info = {
     id: "clangd",
-    root: NearestRoot([
-      "compile_commands.json",
-      "compile_flags.txt",
-      ".clangd",
-      "CMakeLists.txt",
-      "Makefile",
-    ]),
-    extensions: [
-      ".c",
-      ".cpp",
-      ".cc",
-      ".cxx",
-      ".c++",
-      ".h",
-      ".hpp",
-      ".hh",
-      ".hxx",
-      ".h++",
-    ],
+    root: NearestRoot(["compile_commands.json", "compile_flags.txt", ".clangd", "CMakeLists.txt", "Makefile"]),
+    extensions: [".c", ".cpp", ".cc", ".cxx", ".c++", ".h", ".hpp", ".hh", ".hxx", ".h++"],
     async spawn(root) {
       let bin = Bun.which("clangd", {
         PATH: process.env["PATH"] + ":" + Global.Path.bin,
@@ -685,9 +589,7 @@ export namespace LSPServer {
         if (Flag.OPENCODE_DISABLE_LSP_DOWNLOAD) return
         log.info("downloading clangd from GitHub releases")
 
-        const releaseResponse = await fetch(
-          "https://api.github.com/repos/clangd/clangd/releases/latest",
-        )
+        const releaseResponse = await fetch("https://api.github.com/repos/clangd/clangd/releases/latest")
         if (!releaseResponse.ok) {
           log.error("Failed to fetch clangd release info")
           return
@@ -705,9 +607,7 @@ export namespace LSPServer {
         } else if (platform === "win32") {
           assetName = "clangd-windows-"
         } else {
-          log.error(
-            `Platform ${platform} is not supported by clangd auto-download`,
-          )
+          log.error(`Platform ${platform} is not supported by clangd auto-download`)
           return
         }
 
@@ -715,9 +615,7 @@ export namespace LSPServer {
 
         const asset = release.assets.find((a: any) => a.name === assetName)
         if (!asset) {
-          log.error(
-            `Could not find asset ${assetName} in latest clangd release`,
-          )
+          log.error(`Could not find asset ${assetName} in latest clangd release`)
           return
         }
 
@@ -734,15 +632,8 @@ export namespace LSPServer {
         await $`unzip -o -q ${zipPath}`.quiet().cwd(Global.Path.bin).nothrow()
         await fs.rm(zipPath, { force: true })
 
-        const extractedDir = path.join(
-          Global.Path.bin,
-          assetName.replace(".zip", ""),
-        )
-        bin = path.join(
-          extractedDir,
-          "bin",
-          "clangd" + (platform === "win32" ? ".exe" : ""),
-        )
+        const extractedDir = path.join(Global.Path.bin, assetName.replace(".zip", ""))
+        bin = path.join(extractedDir, "bin", "clangd" + (platform === "win32" ? ".exe" : ""))
 
         if (!(await Bun.file(bin).exists())) {
           log.error("Failed to extract clangd binary")
@@ -784,28 +675,19 @@ export namespace LSPServer {
       let binary = Bun.which("svelteserver")
       const args: string[] = []
       if (!binary) {
-        const js = path.join(
-          Global.Path.bin,
-          "node_modules",
-          "svelte-language-server",
-          "bin",
-          "server.js",
-        )
+        const js = path.join(Global.Path.bin, "node_modules", "svelte-language-server", "bin", "server.js")
         if (!(await Bun.file(js).exists())) {
           if (Flag.OPENCODE_DISABLE_LSP_DOWNLOAD) return
-          await Bun.spawn(
-            [BunProc.which(), "install", "svelte-language-server"],
-            {
-              cwd: Global.Path.bin,
-              env: {
-                ...process.env,
-                BUN_BE_BUN: "1",
-              },
-              stdout: "pipe",
-              stderr: "pipe",
-              stdin: "pipe",
+          await Bun.spawn([BunProc.which(), "install", "svelte-language-server"], {
+            cwd: Global.Path.bin,
+            env: {
+              ...process.env,
+              BUN_BE_BUN: "1",
             },
-          ).exited
+            stdout: "pipe",
+            stderr: "pipe",
+            stdin: "pipe",
+          }).exited
         }
         binary = BunProc.which()
         args.push("run", js)

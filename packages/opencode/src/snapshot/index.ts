@@ -40,15 +40,8 @@ export namespace Snapshot {
         .nothrow()
       log.info("initialized")
     }
-    await $`git --git-dir ${git} add .`
-      .quiet()
-      .cwd(Instance.directory)
-      .nothrow()
-    const hash = await $`git --git-dir ${git} write-tree`
-      .quiet()
-      .cwd(Instance.directory)
-      .nothrow()
-      .text()
+    await $`git --git-dir ${git} add .`.quiet().cwd(Instance.directory).nothrow()
+    const hash = await $`git --git-dir ${git} write-tree`.quiet().cwd(Instance.directory).nothrow().text()
     log.info("tracking", { hash, cwd: Instance.directory, git })
     return hash.trim()
   }
@@ -61,13 +54,8 @@ export namespace Snapshot {
 
   export async function patch(hash: string): Promise<Patch> {
     const git = gitdir()
-    await $`git --git-dir ${git} add .`
-      .quiet()
-      .cwd(Instance.directory)
-      .nothrow()
-    const files = await $`git --git-dir ${git} diff --name-only ${hash} -- .`
-      .cwd(Instance.directory)
-      .text()
+    await $`git --git-dir ${git} add .`.quiet().cwd(Instance.directory).nothrow()
+    const files = await $`git --git-dir ${git} diff --name-only ${hash} -- .`.cwd(Instance.directory).text()
     return {
       hash,
       files: files
@@ -94,11 +82,10 @@ export namespace Snapshot {
       for (const file of item.files) {
         if (files.has(file)) continue
         log.info("reverting", { file, hash: item.hash })
-        const result =
-          await $`git --git-dir=${git} checkout ${item.hash} -- ${file}`
-            .quiet()
-            .cwd(Instance.worktree)
-            .nothrow()
+        const result = await $`git --git-dir=${git} checkout ${item.hash} -- ${file}`
+          .quiet()
+          .cwd(Instance.worktree)
+          .nothrow()
         if (result.exitCode !== 0) {
           log.info("file not found in history, deleting", { file })
           await fs.unlink(file).catch(() => {})
@@ -110,10 +97,7 @@ export namespace Snapshot {
 
   export async function diff(hash: string) {
     const git = gitdir()
-    const result = await $`git --git-dir=${git} diff ${hash} -- .`
-      .quiet()
-      .cwd(Instance.worktree)
-      .text()
+    const result = await $`git --git-dir=${git} diff ${hash} -- .`.quiet().cwd(Instance.worktree).text()
     return result.trim()
   }
 

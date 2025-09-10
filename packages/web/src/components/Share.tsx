@@ -1,14 +1,4 @@
-import {
-  For,
-  Show,
-  onMount,
-  Suspense,
-  onCleanup,
-  createMemo,
-  createSignal,
-  SuspenseList,
-  createEffect,
-} from "solid-js"
+import { For, Show, onMount, Suspense, onCleanup, createMemo, createSignal, SuspenseList, createEffect } from "solid-js"
 import { DateTime } from "luxon"
 import { createStore, reconcile, unwrap } from "solid-js/store"
 import { IconArrowDown } from "./icons"
@@ -21,12 +11,7 @@ import { Part, ProviderIcon } from "./share/part"
 
 type MessageWithParts = MessageV2.Info & { parts: MessageV2.Part[] }
 
-type Status =
-  | "disconnected"
-  | "connecting"
-  | "connected"
-  | "error"
-  | "reconnecting"
+type Status = "disconnected" | "connecting" | "connected" | "error" | "reconnecting"
 
 function scrollToAnchor(id: string) {
   const el = document.getElementById(id)
@@ -81,12 +66,8 @@ export default function Share(props: { id: string; api: string; info: Session.In
     },
     messages: {},
   })
-  const messages = createMemo(() =>
-    Object.values(store.messages).toSorted((a, b) => a.id?.localeCompare(b.id)),
-  )
-  const [connectionStatus, setConnectionStatus] = createSignal<
-    [Status, string?]
-  >(["disconnected", "Disconnected"])
+  const messages = createMemo(() => Object.values(store.messages).toSorted((a, b) => a.id?.localeCompare(b.id)))
+  const [connectionStatus, setConnectionStatus] = createSignal<[Status, string?]>(["disconnected", "Disconnected"])
   createEffect(() => {
     console.log(unwrap(store))
   })
@@ -147,8 +128,7 @@ export default function Share(props: { id: string; api: string; info: Session.In
             if ("metadata" in d.content) {
               d.content = fromV1(d.content)
             }
-            d.content.parts =
-              d.content.parts ?? store.messages[messageID]?.parts ?? []
+            d.content.parts = d.content.parts ?? store.messages[messageID]?.parts ?? []
             setStore("messages", messageID, reconcile(d.content))
           }
           if (type === "part") {
@@ -177,10 +157,7 @@ export default function Share(props: { id: string; api: string; info: Session.In
 
         // Try to reconnect after 2 seconds
         clearTimeout(reconnectTimer)
-        reconnectTimer = window.setTimeout(
-          setupWebSocket,
-          2000,
-        ) as unknown as number
+        reconnectTimer = window.setTimeout(setupWebSocket, 2000) as unknown as number
       }
     }
 
@@ -304,10 +281,7 @@ export default function Share(props: { id: string; api: string; info: Session.In
         result.tokens.output += msg.tokens.output
         result.tokens.reasoning += msg.tokens.reasoning
 
-        result.models[`${msg.providerID} ${msg.modelID}`] = [
-          msg.providerID,
-          msg.modelID,
-        ]
+        result.models[`${msg.providerID} ${msg.modelID}`] = [msg.providerID, msg.modelID]
 
         if (msg.path.root) {
           result.rootDir = msg.path.root
@@ -356,22 +330,15 @@ export default function Share(props: { id: string; api: string; info: Session.In
             </ul>
             <div
               data-component="header-time"
-              title={DateTime.fromMillis(data().created || 0).toLocaleString(
-                DateTime.DATETIME_FULL_WITH_SECONDS,
-              )}
+              title={DateTime.fromMillis(data().created || 0).toLocaleString(DateTime.DATETIME_FULL_WITH_SECONDS)}
             >
-              {DateTime.fromMillis(data().created || 0).toLocaleString(
-                DateTime.DATETIME_MED,
-              )}
+              {DateTime.fromMillis(data().created || 0).toLocaleString(DateTime.DATETIME_MED)}
             </div>
           </div>
         </div>
 
         <div>
-          <Show
-            when={data().messages.length > 0}
-            fallback={<p>Waiting for messages...</p>}
-          >
+          <Show when={data().messages.length > 0} fallback={<p>Waiting for messages...</p>}>
             <div class={styles.parts}>
               <SuspenseList revealOrder="forwards">
                 <For each={data().messages}>
@@ -382,16 +349,10 @@ export default function Share(props: { id: string; api: string; info: Session.In
                         if (x.type === "snapshot") return false
                         if (x.type === "patch") return false
                         if (x.type === "step-finish") return false
-                        if (x.type === "text" && x.synthetic === true)
-                          return false
-                        if (x.type === "tool" && x.tool === "todoread")
-                          return false
+                        if (x.type === "text" && x.synthetic === true) return false
+                        if (x.type === "tool" && x.tool === "todoread") return false
                         if (x.type === "text" && !x.text) return false
-                        if (
-                          x.type === "tool" &&
-                          (x.state.status === "pending" ||
-                            x.state.status === "running")
-                        )
+                        if (x.type === "tool" && (x.state.status === "pending" || x.state.status === "running"))
                           return false
                         return true
                       }),
@@ -403,8 +364,7 @@ export default function Share(props: { id: string; api: string; info: Session.In
                           {(part, partIndex) => {
                             const last = createMemo(
                               () =>
-                                data().messages.length === msgIndex() + 1 &&
-                                filteredParts().length === partIndex() + 1,
+                                data().messages.length === msgIndex() + 1 && filteredParts().length === partIndex() + 1,
                             )
 
                             onMount(() => {
@@ -421,14 +381,7 @@ export default function Share(props: { id: string; api: string; info: Session.In
                               }
                             })
 
-                            return (
-                              <Part
-                                last={last()}
-                                part={part}
-                                index={partIndex()}
-                                message={msg}
-                              />
-                            )
+                            return <Part last={last()} part={part} index={partIndex()} message={msg} />
                           }}
                         </For>
                       </Suspense>
@@ -453,11 +406,7 @@ export default function Share(props: { id: string; api: string; info: Session.In
                     </li>
                     <li>
                       <span data-element-label>Input Tokens</span>
-                      {data().tokens.input ? (
-                        <span>{data().tokens.input}</span>
-                      ) : (
-                        <span data-placeholder>&mdash;</span>
-                      )}
+                      {data().tokens.input ? <span>{data().tokens.input}</span> : <span data-placeholder>&mdash;</span>}
                     </li>
                     <li>
                       <span data-element-label>Output Tokens</span>
@@ -491,10 +440,7 @@ export default function Share(props: { id: string; api: string; info: Session.In
                 "overflow-y": "auto",
               }}
             >
-              <Show
-                when={data().messages.length > 0}
-                fallback={<p>Waiting for messages...</p>}
-              >
+              <Show when={data().messages.length > 0} fallback={<p>Waiting for messages...</p>}>
                 <ul style={{ "list-style-type": "none", padding: 0 }}>
                   <For each={data().messages}>
                     {(msg) => (
@@ -522,9 +468,7 @@ export default function Share(props: { id: string; api: string; info: Session.In
           <button
             type="button"
             class={styles["scroll-button"]}
-            onClick={() =>
-              document.body.scrollIntoView({ behavior: "smooth", block: "end" })
-            }
+            onClick={() => document.body.scrollIntoView({ behavior: "smooth", block: "end" })}
             onMouseEnter={() => {
               setIsButtonHovered(true)
               if (scrollTimeout) {
@@ -616,8 +560,7 @@ export function fromV1(v1: Message.Info): MessageWithParts {
                   }
                 }
 
-                const { title, time, ...metadata } =
-                  v1.metadata.tool[part.toolInvocation.toolCallId]
+                const { title, time, ...metadata } = v1.metadata.tool[part.toolInvocation.toolCallId]
                 if (part.toolInvocation.state === "call") {
                   return {
                     status: "running",

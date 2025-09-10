@@ -47,12 +47,10 @@ const AgentCreateCommand = cmd({
       const spinner = prompts.spinner()
 
       spinner.start("Generating agent configuration...")
-      const generated = await Agent.generate({ description: query }).catch(
-        (error) => {
-          spinner.stop(`LLM failed to generate agent: ${error.message}`, 1)
-          throw new UI.CancelledError()
-        },
-      )
+      const generated = await Agent.generate({ description: query }).catch((error) => {
+        spinner.stop(`LLM failed to generate agent: ${error.message}`, 1)
+        throw new UI.CancelledError()
+      })
       spinner.stop(`Agent ${generated.identifier} generated`)
 
       const availableTools = [
@@ -119,9 +117,7 @@ const AgentCreateCommand = cmd({
 
       const content = matter.stringify(generated.systemPrompt, frontmatter)
       const filePath = path.join(
-        scope === "global"
-          ? Global.Path.config
-          : path.join(Instance.worktree, ".opencode"),
+        scope === "global" ? Global.Path.config : path.join(Instance.worktree, ".opencode"),
         `agent`,
         `${generated.identifier}.md`,
       )

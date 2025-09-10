@@ -63,11 +63,7 @@ export const prettier: Info = {
     ".gql",
   ],
   async enabled() {
-    const items = await Filesystem.findUp(
-      "package.json",
-      Instance.directory,
-      Instance.worktree,
-    )
+    const items = await Filesystem.findUp("package.json", Instance.directory, Instance.worktree)
     for (const item of items) {
       const json = await Bun.file(item).json()
       if (json.dependencies?.prettier) return true
@@ -79,14 +75,7 @@ export const prettier: Info = {
 
 export const biome: Info = {
   name: "biome",
-  command: [
-    BunProc.which(),
-    "x",
-    "@biomejs/biome",
-    "format",
-    "--write",
-    "$FILE",
-  ],
+  command: [BunProc.which(), "x", "@biomejs/biome", "format", "--write", "$FILE"],
   environment: {
     BUN_BE_BUN: "1",
   },
@@ -121,11 +110,7 @@ export const biome: Info = {
   async enabled() {
     const configs = ["biome.json", "biome.jsonc"]
     for (const config of configs) {
-      const found = await Filesystem.findUp(
-        config,
-        Instance.directory,
-        Instance.worktree,
-      )
+      const found = await Filesystem.findUp(config, Instance.directory, Instance.worktree)
       if (found.length > 0) {
         return true
       }
@@ -146,27 +131,9 @@ export const zig: Info = {
 export const clang: Info = {
   name: "clang-format",
   command: ["clang-format", "-i", "$FILE"],
-  extensions: [
-    ".c",
-    ".cc",
-    ".cpp",
-    ".cxx",
-    ".c++",
-    ".h",
-    ".hh",
-    ".hpp",
-    ".hxx",
-    ".h++",
-    ".ino",
-    ".C",
-    ".H",
-  ],
+  extensions: [".c", ".cc", ".cpp", ".cxx", ".c++", ".h", ".hh", ".hpp", ".hxx", ".h++", ".ino", ".C", ".H"],
   async enabled() {
-    const items = await Filesystem.findUp(
-      ".clang-format",
-      Instance.directory,
-      Instance.worktree,
-    )
+    const items = await Filesystem.findUp(".clang-format", Instance.directory, Instance.worktree)
     return items.length > 0
   },
 }
@@ -188,11 +155,7 @@ export const ruff: Info = {
     if (!Bun.which("ruff")) return false
     const configs = ["pyproject.toml", "ruff.toml", ".ruff.toml"]
     for (const config of configs) {
-      const found = await Filesystem.findUp(
-        config,
-        Instance.directory,
-        Instance.worktree,
-      )
+      const found = await Filesystem.findUp(config, Instance.directory, Instance.worktree)
       if (found.length > 0) {
         if (config === "pyproject.toml") {
           const content = await Bun.file(found[0]).text()
@@ -204,11 +167,7 @@ export const ruff: Info = {
     }
     const deps = ["requirements.txt", "pyproject.toml", "Pipfile"]
     for (const dep of deps) {
-      const found = await Filesystem.findUp(
-        dep,
-        Instance.directory,
-        Instance.worktree,
-      )
+      const found = await Filesystem.findUp(dep, Instance.directory, Instance.worktree)
       if (found.length > 0) {
         const content = await Bun.file(found[0]).text()
         if (content.includes("ruff")) return true

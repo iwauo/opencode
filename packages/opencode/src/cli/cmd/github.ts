@@ -65,9 +65,7 @@ export const GithubInstallCommand = cmd({
       async function getAppInfo() {
         const project = Instance.project
         if (project.vcs !== "git") {
-          prompts.log.error(
-            `Could not find git repository. Please run this command from a git repository.`,
-          )
+          prompts.log.error(`Could not find git repository. Please run this command from a git repository.`)
           throw new UI.CancelledError()
         }
 
@@ -84,13 +82,9 @@ export const GithubInstallCommand = cmd({
         // ie. git@github.com:sst/opencode
         // ie. ssh://git@github.com/sst/opencode.git
         // ie. ssh://git@github.com/sst/opencode
-        const parsed = info.match(
-          /^(?:(?:https?|ssh):\/\/)?(?:git@)?github\.com[:/]([^/]+)\/([^/.]+?)(?:\.git)?$/,
-        )
+        const parsed = info.match(/^(?:(?:https?|ssh):\/\/)?(?:git@)?github\.com[:/]([^/]+)\/([^/.]+?)(?:\.git)?$/)
         if (!parsed) {
-          prompts.log.error(
-            `Could not find git repository. Please run this command from a git repository.`,
-          )
+          prompts.log.error(`Could not find git repository. Please run this command from a git repository.`)
           throw new UI.CancelledError()
         }
         const [, owner, repo] = parsed
@@ -196,9 +190,7 @@ export const GithubInstallCommand = cmd({
         s.stop("Installed GitHub app")
 
         async function getInstallation() {
-          return await fetch(
-            `https://api.opencode.ai/get_github_app_installation?owner=${app.owner}&repo=${app.repo}`,
-          )
+          return await fetch(`https://api.opencode.ai/get_github_app_installation?owner=${app.owner}&repo=${app.repo}`)
             .then((res) => res.json())
             .then((data: any) => data.installation)
         }

@@ -7,14 +7,8 @@ import { Identifier } from "../id/id"
 import { LSP } from "../lsp"
 
 export namespace MessageV2 {
-  export const OutputLengthError = NamedError.create(
-    "MessageOutputLengthError",
-    z.object({}),
-  )
-  export const AbortedError = NamedError.create(
-    "MessageAbortedError",
-    z.object({}),
-  )
+  export const OutputLengthError = NamedError.create("MessageOutputLengthError", z.object({}))
+  export const AbortedError = NamedError.create("MessageAbortedError", z.object({}))
   export const AuthError = NamedError.create(
     "ProviderAuthError",
     z.object({
@@ -82,12 +76,7 @@ export namespace MessageV2 {
   export type ToolStateError = z.infer<typeof ToolStateError>
 
   export const ToolState = z
-    .discriminatedUnion("status", [
-      ToolStatePending,
-      ToolStateRunning,
-      ToolStateCompleted,
-      ToolStateError,
-    ])
+    .discriminatedUnion("status", [ToolStatePending, ToolStateRunning, ToolStateCompleted, ToolStateError])
     .openapi({
       ref: "ToolState",
     })
@@ -182,11 +171,9 @@ export namespace MessageV2 {
     ref: "SymbolSource",
   })
 
-  export const FilePartSource = z
-    .discriminatedUnion("type", [FileSource, SymbolSource])
-    .openapi({
-      ref: "FilePartSource",
-    })
+  export const FilePartSource = z.discriminatedUnion("type", [FileSource, SymbolSource]).openapi({
+    ref: "FilePartSource",
+  })
 
   export const FilePart = PartBase.extend({
     type: z.literal("file"),
@@ -400,8 +387,7 @@ export namespace MessageV2 {
                   }
                 }
 
-                const { title, time, ...metadata } =
-                  v1.metadata.tool[part.toolInvocation.toolCallId] ?? {}
+                const { title, time, ...metadata } = v1.metadata.tool[part.toolInvocation.toolCallId] ?? {}
                 if (part.toolInvocation.state === "call") {
                   return {
                     status: "running",

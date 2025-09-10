@@ -1,12 +1,4 @@
-import {
-  createEffect,
-  createMemo,
-  For,
-  Match,
-  Show,
-  Switch,
-  type Component,
-} from "solid-js"
+import { createEffect, createMemo, For, Match, Show, Switch, type Component } from "solid-js"
 import { Dynamic } from "solid-js/web"
 import path from "path"
 import { useRouteData } from "./context/route"
@@ -15,12 +7,7 @@ import { SplitBorder } from "./component/border"
 import { Theme } from "./context/theme"
 import { bold, fg, ScrollBoxRenderable, type TextChunk } from "@opentui/core"
 import { Prompt } from "./component/prompt"
-import type {
-  AssistantMessage,
-  Part,
-  ToolPart,
-  UserMessage,
-} from "@opencode-ai/sdk"
+import type { AssistantMessage, Part, ToolPart, UserMessage } from "@opencode-ai/sdk"
 import type { TextPart } from "ai"
 import { useLocal } from "./context/local"
 import { Locale } from "../../../util/locale"
@@ -57,21 +44,9 @@ export function Session() {
   })
 
   return (
-    <box
-      paddingTop={1}
-      paddingBottom={1}
-      paddingLeft={2}
-      paddingRight={2}
-      flexGrow={1}
-      maxHeight="100%"
-    >
+    <box paddingTop={1} paddingBottom={1} paddingLeft={2} paddingRight={2} flexGrow={1} maxHeight="100%">
       <Show when={session()}>
-        <box
-          paddingLeft={1}
-          paddingRight={1}
-          {...SplitBorder}
-          borderColor={Theme.backgroundElement}
-        >
+        <box paddingLeft={1} paddingRight={1} {...SplitBorder} borderColor={Theme.backgroundElement}>
           <text>
             {bold(fg(Theme.accent)("#"))} {bold(session().title)}
           </text>
@@ -81,9 +56,7 @@ export function Session() {
                 <text fg={Theme.textMuted}>{session().share!.url}</text>
               </Match>
               <Match when={true}>
-                <text>
-                  /share {fg(Theme.textMuted)("to create a shareable link")}
-                </text>
+                <text>/share {fg(Theme.textMuted)("to create a shareable link")}</text>
               </Match>
             </Switch>
           </box>
@@ -102,16 +75,10 @@ export function Session() {
             {(message) => (
               <Switch>
                 <Match when={message.role === "user"}>
-                  <UserMessage
-                    message={message as UserMessage}
-                    parts={sync.data.part[message.id] ?? []}
-                  />
+                  <UserMessage message={message as UserMessage} parts={sync.data.part[message.id] ?? []} />
                 </Match>
                 <Match when={message.role === "assistant"}>
-                  <AssistantMessage
-                    message={message as AssistantMessage}
-                    parts={sync.data.part[message.id] ?? []}
-                  />
+                  <AssistantMessage message={message as AssistantMessage} parts={sync.data.part[message.id] ?? []} />
                 </Match>
               </Switch>
             )}
@@ -121,13 +88,7 @@ export function Session() {
           <box paddingBottom={1}>
             <For each={todo()}>
               {(todo) => (
-                <text
-                  fg={
-                    todo.status === "in_progress"
-                      ? Theme.success
-                      : Theme.textMuted
-                  }
-                >
+                <text fg={todo.status === "in_progress" ? Theme.success : Theme.textMuted}>
                   [{todo.status === "completed" ? "✓" : " "}] {todo.content}
                 </text>
               )}
@@ -143,12 +104,7 @@ export function Session() {
 }
 
 function UserMessage(props: { message: UserMessage; parts: Part[] }) {
-  const text = createMemo(
-    () =>
-      props.parts.flatMap((x) =>
-        x.type === "text" && !x.synthetic ? [x] : [],
-      )[0],
-  )
+  const text = createMemo(() => props.parts.flatMap((x) => (x.type === "text" && !x.synthetic ? [x] : []))[0])
   const sync = useSync()
   return (
     <box
@@ -163,10 +119,7 @@ function UserMessage(props: { message: UserMessage; parts: Part[] }) {
     >
       <text>{text()?.text}</text>
       <text>
-        {sync.data.config.username ?? "You"}{" "}
-        {fg(Theme.textMuted)(
-          "(" + Locale.time(props.message.time.created) + ")",
-        )}
+        {sync.data.config.username ?? "You"} {fg(Theme.textMuted)("(" + Locale.time(props.message.time.created) + ")")}
       </text>
     </box>
   )
@@ -176,16 +129,10 @@ function AssistantMessage(props: { message: AssistantMessage; parts: Part[] }) {
   return (
     <For each={props.parts}>
       {(part) => {
-        const component = createMemo(
-          () => PART_MAPPING[part.type as keyof typeof PART_MAPPING],
-        )
+        const component = createMemo(() => PART_MAPPING[part.type as keyof typeof PART_MAPPING])
         return (
           <Show when={component()}>
-            <Dynamic
-              component={component()}
-              part={part as any}
-              message={props.message}
-            />
+            <Dynamic component={component()} part={part as any} message={props.message} />
           </Show>
         )
       }}
@@ -200,9 +147,7 @@ const PART_MAPPING = {
 
 function TextPart(props: { part: TextPart; message: AssistantMessage }) {
   const sync = useSync()
-  const agent = createMemo(
-    () => sync.data.agent.find((x) => x.name === props.message.mode)!,
-  )
+  const agent = createMemo(() => sync.data.agent.find((x) => x.name === props.message.mode)!)
   const local = useLocal()
 
   return (
@@ -210,9 +155,7 @@ function TextPart(props: { part: TextPart; message: AssistantMessage }) {
       <text>{props.part.text.trim()}</text>
       <text>
         {fg(local.agent.color(agent().name))(Locale.titlecase(agent().name))}{" "}
-        {fg(Theme.textMuted)(
-          props.message.providerID + "/" + props.message.modelID,
-        )}
+        {fg(Theme.textMuted)(props.message.providerID + "/" + props.message.modelID)}
       </text>
     </box>
   )
@@ -235,23 +178,14 @@ function ToolPart(props: { part: ToolPart; message: AssistantMessage }) {
     return ready({
       input: props.part.state.input,
       metadata: props.part.state.metadata,
-      output:
-        props.part.state.status === "completed"
-          ? props.part.state.output
-          : undefined,
+      output: props.part.state.status === "completed" ? props.part.state.output : undefined,
     })
   })
 
   return (
     <Show when={component()}>
       <box {...SplitBorder} borderColor={Theme.backgroundPanel}>
-        <box
-          paddingTop={1}
-          paddingBottom={1}
-          paddingLeft={2}
-          backgroundColor={Theme.backgroundPanel}
-          gap={1}
-        >
+        <box paddingTop={1} paddingBottom={1} paddingLeft={2} backgroundColor={Theme.backgroundPanel} gap={1}>
           {component()}
         </box>
       </box>
@@ -338,9 +272,7 @@ ToolRegistry.register<typeof GlobTool>({
   ready(props) {
     const files = createMemo(() => {
       const result = props.output?.split("\n").filter((x) => x) ?? []
-      return result
-        .map((file) => path.relative(Instance.directory, file))
-        .join("\n")
+      return result.map((file) => path.relative(Instance.directory, file)).join("\n")
     })
     return (
       <>
@@ -374,9 +306,7 @@ ToolRegistry.register<typeof ListTool>({
   ready(props) {
     return (
       <>
-        <text fg={Theme.textMuted}>
-          List {(props.input as any).path || "."}
-        </text>
+        <text fg={Theme.textMuted}>List {(props.input as any).path || "."}</text>
         <box>
           <text>{props.output?.trim()}</text>
         </box>
@@ -391,9 +321,7 @@ ToolRegistry.register<typeof TaskTool>({
   ready(props) {
     return (
       <>
-        <text fg={Theme.textMuted}>
-          Task {(props.input as any).description}
-        </text>
+        <text fg={Theme.textMuted}>Task {(props.input as any).description}</text>
         <box>
           <text>{props.output?.trim()}</text>
         </box>
@@ -461,9 +389,7 @@ ToolRegistry.register<typeof EditTool>({
             <For each={diffContent().left}>{(line) => <text>{line}</text>}</For>
           </box>
           <box flexGrow={1} flexShrink={0}>
-            <For each={diffContent().right}>
-              {(line) => <text>{line}</text>}
-            </For>
+            <For each={diffContent().right}>{(line) => <text>{line}</text>}</For>
           </box>
         </box>
       </>

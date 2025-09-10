@@ -1,20 +1,5 @@
-import {
-  InputRenderable,
-  TextAttributes,
-  fg,
-  bold,
-  BoxRenderable,
-  type ParsedKey,
-} from "@opentui/core"
-import {
-  createEffect,
-  createMemo,
-  createResource,
-  For,
-  Match,
-  onMount,
-  Switch,
-} from "solid-js"
+import { InputRenderable, TextAttributes, fg, bold, BoxRenderable, type ParsedKey } from "@opentui/core"
+import { createEffect, createMemo, createResource, For, Match, onMount, Switch } from "solid-js"
 
 import { useLocal } from "../context/local"
 import { Theme } from "../context/theme"
@@ -84,22 +69,12 @@ export function Prompt(props: PromptProps) {
       />
       <box ref={(r) => (anchor = r)}>
         <box flexDirection="row" {...SplitBorder}>
-          <box
-            backgroundColor={Theme.backgroundElement}
-            width={3}
-            justifyContent="center"
-            alignItems="center"
-          >
+          <box backgroundColor={Theme.backgroundElement} width={3} justifyContent="center" alignItems="center">
             <text attributes={TextAttributes.BOLD} fg={Theme.primary}>
               {">"}
             </text>
           </box>
-          <box
-            paddingTop={1}
-            paddingBottom={2}
-            backgroundColor={Theme.backgroundElement}
-            flexGrow={1}
-          >
+          <box paddingTop={1} paddingBottom={2} backgroundColor={Theme.backgroundElement} flexGrow={1}>
             <input
               onInput={(value) => {
                 let diff = value.length - store.input.length
@@ -113,20 +88,13 @@ export function Prompt(props: PromptProps) {
                         part.source.text.start += diff
                         part.source.text.end += diff
                       }
-                      const sliced = draft.input.slice(
-                        part.source.text.start,
-                        part.source.text.end,
-                      )
+                      const sliced = draft.input.slice(part.source.text.start, part.source.text.end)
                       if (sliced != part.source.text.value && diff < 0) {
                         diff -= part.source.text.value.length
                         draft.input =
-                          draft.input.slice(0, part.source.text.start) +
-                          draft.input.slice(part.source.text.end)
+                          draft.input.slice(0, part.source.text.start) + draft.input.slice(part.source.text.end)
                         draft.parts.splice(i, 1)
-                        input.cursorPosition = Math.max(
-                          0,
-                          part.source.text.start - 1,
-                        )
+                        input.cursorPosition = Math.max(0, part.source.text.start - 1)
                         i--
                       }
                     }
@@ -143,15 +111,9 @@ export function Prompt(props: PromptProps) {
                   const direction = Math.sign(old - position)
                   for (const part of store.parts) {
                     if (part.source && part.source.type === "file") {
-                      if (
-                        position >= part.source.text.start &&
-                        position < part.source.text.end
-                      ) {
+                      if (position >= part.source.text.start && position < part.source.text.end) {
                         if (direction === 1) {
-                          input.cursorPosition = Math.max(
-                            0,
-                            part.source.text.start - 1,
-                          )
+                          input.cursorPosition = Math.max(0, part.source.text.start - 1)
                         }
                         if (direction === -1) {
                           input.cursorPosition = part.source.text.end
@@ -167,9 +129,7 @@ export function Prompt(props: PromptProps) {
                 const sessionID = props.sessionID
                   ? props.sessionID
                   : await (async () => {
-                      const sessionID = await sdk.session
-                        .create({})
-                        .then((x) => x.data!.id)
+                      const sessionID = await sdk.session.create({}).then((x) => x.data!.id)
                       route.navigate({
                         type: "session",
                         sessionID,
@@ -213,19 +173,9 @@ export function Prompt(props: PromptProps) {
               backgroundColor={Theme.backgroundElement}
             />
           </box>
-          <box
-            backgroundColor={Theme.backgroundElement}
-            width={1}
-            justifyContent="center"
-            alignItems="center"
-          ></box>
+          <box backgroundColor={Theme.backgroundElement} width={1} justifyContent="center" alignItems="center"></box>
         </box>
-        <box
-          paddingLeft={2}
-          paddingRight={1}
-          flexDirection="row"
-          justifyContent="space-between"
-        >
+        <box paddingLeft={2} paddingRight={1} flexDirection="row" justifyContent="space-between">
           <Switch>
             <Match when={working()}>
               <text>working...</text>
@@ -235,8 +185,7 @@ export function Prompt(props: PromptProps) {
             </Match>
           </Switch>
           <text>
-            {fg(Theme.textMuted)(local.model.parsed().provider)}{" "}
-            {bold(local.model.parsed().model)}
+            {fg(Theme.textMuted)(local.model.parsed().provider)} {bold(local.model.parsed().model)}
           </text>
         </box>
       </box>
@@ -357,8 +306,7 @@ function Autocomplete(props: {
             props.setPrompt((draft) => {
               const append = "@" + file + " "
               if (store.index === 0) draft.input = append
-              if (store.index > 0)
-                draft.input = draft.input.slice(0, store.index) + append
+              if (store.index > 0) draft.input = draft.input.slice(0, store.index) + append
               draft.parts.push(part)
             })
             setTimeout(() => hide(), 0)
@@ -389,15 +337,9 @@ function Autocomplete(props: {
             <box
               paddingLeft={1}
               paddingRight={1}
-              backgroundColor={
-                index() === store.selected ? Theme.primary : undefined
-              }
+              backgroundColor={index() === store.selected ? Theme.primary : undefined}
             >
-              <text
-                fg={index() === store.selected ? Theme.background : Theme.text}
-              >
-                {option.value}
-              </text>
+              <text fg={index() === store.selected ? Theme.background : Theme.text}>{option.value}</text>
             </box>
           )}
         </For>

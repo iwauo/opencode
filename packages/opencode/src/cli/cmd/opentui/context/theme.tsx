@@ -254,10 +254,7 @@ type Theme = {
   syntaxPunctuation: string
 }
 
-export const Theme = Object.entries(OPENCODE_THEME).reduce(
-  (acc, [key, value]) => {
-    acc[key as keyof Theme] = value.dark
-    return acc
-  },
-  {} as Theme,
-)
+export const Theme = Object.entries(OPENCODE_THEME).reduce((acc, [key, value]) => {
+  acc[key as keyof Theme] = value.dark
+  return acc
+}, {} as Theme)

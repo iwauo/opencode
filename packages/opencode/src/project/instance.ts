@@ -11,10 +11,7 @@ const context = Context.create<{
 export const Instance = {
   async provide<R>(directory: string, cb: () => R): Promise<R> {
     const project = await Project.fromDirectory(directory)
-    return context.provide(
-      { directory, worktree: project.worktree, project },
-      cb,
-    )
+    return context.provide({ directory, worktree: project.worktree, project }, cb)
   },
   get directory() {
     return context.use().directory
@@ -25,10 +22,7 @@ export const Instance = {
   get project() {
     return context.use().project
   },
-  state<S>(
-    init: () => S,
-    dispose?: (state: Awaited<S>) => Promise<void>,
-  ): () => S {
+  state<S>(init: () => S, dispose?: (state: Awaited<S>) => Promise<void>): () => S {
     return State.create(() => Instance.directory, init, dispose)
   },
   async dispose() {
