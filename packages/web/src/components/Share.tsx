@@ -52,11 +52,7 @@ function getStatusText(status: [Status, string?]): string {
   }
 }
 
-export default function Share(props: {
-  id: string
-  api: string
-  info: Session.Info
-}) {
+export default function Share(props: { id: string; api: string; info: Session.Info }) {
   let lastScrollY = 0
   let hasScrolledToAnchor = false
   let scrollTimeout: number | undefined

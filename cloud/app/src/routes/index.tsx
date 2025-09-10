@@ -94,9 +94,8 @@ export default function Home() {
               for the LLM
             </li>
             <li>
-              <strong>opencode zen</strong> A{" "}
-              <a href="/docs/zen">curated list of models</a> provided by
-              opencode <label>New</label>
+              <strong>opencode zen</strong> A <a href="/docs/zen">curated list of models</a> provided by opencode{" "}
+              <label>New</label>
             </li>
             <li>
               <strong>Multi-session</strong> Start multiple agents in parallel

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "version": "0.6.9",
+  "version": "0.6.10",
   "name": "opencode",
   "type": "module",
   "private": true,
@@ -20,7 +20,7 @@
     "@octokit/webhooks-types": "7.6.1",
     "@standard-schema/spec": "1.0.0",
     "@tsconfig/bun": "1.0.7",
-    "@types/bun": "latest",
+    "@types/bun": "catalog:",
     "@types/turndown": "5.0.5",
     "@types/yargs": "17.0.33",
     "typescript": "catalog:",

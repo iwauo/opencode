@@ -46,10 +46,7 @@ export namespace Fzf {
       log.info("found", { filepath })
       return { filepath }
     }
-    filepath = path.join(
-      Global.Path.bin,
-      "fzf" + (process.platform === "win32" ? ".exe" : ""),
-    )
+    filepath = path.join(Global.Path.bin, "fzf" + (process.platform === "win32" ? ".exe" : ""))
 
     const file = Bun.file(filepath)
     if (!(await file.exists())) {
@@ -57,18 +54,15 @@ export namespace Fzf {
       const arch = archMap[process.arch as keyof typeof archMap] ?? "amd64"
 
       const config = PLATFORM[process.platform as keyof typeof PLATFORM]
-      if (!config)
-        throw new UnsupportedPlatformError({ platform: process.platform })
+      if (!config) throw new UnsupportedPlatformError({ platform: process.platform })
 
       const version = VERSION
-      const platformName =
-        process.platform === "win32" ? "windows" : process.platform
+      const platformName = process.platform === "win32" ? "windows" : process.platform
       const filename = `fzf-${version}-${platformName}_${arch}.${config.extension}`
       const url = `https://github.com/junegunn/fzf/releases/download/v${version}/${filename}`
 
       const response = await fetch(url)
-      if (!response.ok)
-        throw new DownloadFailedError({ url, status: response.status })
+      if (!response.ok) throw new DownloadFailedError({ url, status: response.status })
 
       const buffer = await response.arrayBuffer()
       const archivePath = path.join(Global.Path.bin, filename)
@@ -87,9 +81,7 @@ export namespace Fzf {
           })
       }
       if (config.extension === "zip") {
-        const zipFileReader = new ZipReader(
-          new BlobReader(new Blob([await Bun.file(archivePath).arrayBuffer()])),
-        )
+        const zipFileReader = new ZipReader(new BlobReader(new Blob([await Bun.file(archivePath).arrayBuffer()])))
         const entries = await zipFileReader.getEntries()
         let fzfEntry: any
         for (const entry of entries) {

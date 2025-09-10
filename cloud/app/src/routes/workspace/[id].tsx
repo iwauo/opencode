@@ -1,15 +1,7 @@
 import "./[id].css"
 import { Billing } from "@opencode/cloud-core/billing.js"
 import { Key } from "@opencode/cloud-core/key.js"
-import {
-  json,
-  query,
-  action,
-  useParams,
-  useAction,
-  createAsync,
-  useSubmission,
-} from "@solidjs/router"
+import { json, query, action, useParams, useAction, createAsync, useSubmission } from "@solidjs/router"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { withActor } from "~/context/auth.withActor"
 import { IconCopy, IconCheck } from "~/component/icon"
@@ -497,9 +489,7 @@ function PaymentsSection() {
                         {formatDateForTable(date)}
                       </td>
                       <td data-slot="payment-id">{payment.id}</td>
-                      <td data-slot="payment-amount">
-                        ${((payment.amount ?? 0) / 100000000).toFixed(2)}
-                      </td>
+                      <td data-slot="payment-amount">${((payment.amount ?? 0) / 100000000).toFixed(2)}</td>
                     </tr>
                   )
                 }}

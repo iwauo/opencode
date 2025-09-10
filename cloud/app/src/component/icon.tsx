@@ -25,10 +25,7 @@ export function IconLogo(props: JSX.SvgSVGAttributes<SVGSVGElement>) {
       />
       <path d="M144.5 8.5H136.5V41.5H144.5V8.5Z" fill="currentColor" />
       <path d="M136.5 0H112.5V41.5H120.5V8.5H136.5V0Z" fill="currentColor" />
-      <path
-        d="M80.5 0H104.5V8.5H88.5V16.5H104.5V25H88.5V33H104.5V41.5H80.5V0Z"
-        fill="currentColor"
-      />
+      <path d="M80.5 0H104.5V8.5H88.5V16.5H104.5V25H88.5V33H104.5V41.5H80.5V0Z" fill="currentColor" />
       <path
         fill-rule="evenodd"
         clip-rule="evenodd"
@@ -41,10 +38,7 @@ export function IconLogo(props: JSX.SvgSVGAttributes<SVGSVGElement>) {
         d="M0.5 0H32.5V41.5955H0.5V0ZM24.5 8.5H8.5V33H24.5V8.5Z"
         fill="currentColor"
       />
-      <path
-        d="M152.5 0H176.5V8.5H160.5V33H176.5V41.5H152.5V0Z"
-        fill="currentColor"
-      />
+      <path d="M152.5 0H176.5V8.5H160.5V33H176.5V41.5H152.5V0Z" fill="currentColor" />
     </svg>
   )
 }
