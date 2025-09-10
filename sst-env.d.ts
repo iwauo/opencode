@@ -64,20 +64,20 @@ declare module "sst" {
       type: "sst.sst.Secret"
       value: string
     }
-    "HONEYCOMB_API_KEY": {
-      "type": "sst.sst.Secret"
-      "value": string
+    HONEYCOMB_API_KEY: {
+      type: "sst.sst.Secret"
+      value: string
     }
-    "LogProcessor": {
-      "type": "sst.cloudflare.Worker"
+    LogProcessor: {
+      type: "sst.cloudflare.Worker"
     }
-    "OPENAI_API_KEY": {
-      "type": "sst.sst.Secret"
-      "value": string
+    OPENAI_API_KEY: {
+      type: "sst.sst.Secret"
+      value: string
     }
-    "STRIPE_SECRET_KEY": {
-      "type": "sst.sst.Secret"
-      "value": string
+    STRIPE_SECRET_KEY: {
+      type: "sst.sst.Secret"
+      value: string
     }
     STRIPE_WEBHOOK_SECRET: {
       type: "sst.sst.Linkable"

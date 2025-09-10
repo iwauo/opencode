@@ -155,7 +155,9 @@ new sst.cloudflare.x.SolidStart("Console", {
       transform: {
         worker: {
           placement: { mode: "smart" },
-          tailConsumers: logProcessor ? [{ service: logProcessor.nodes.worker.scriptName }] : [],
+          tailConsumers: logProcessor
+            ? [{ service: logProcessor.nodes.worker.scriptName }]
+            : [],
         },
       },
     },

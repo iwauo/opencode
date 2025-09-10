@@ -50,17 +50,17 @@ declare module "sst" {
       type: "sst.sst.Secret"
       value: string
     }
-    "HONEYCOMB_API_KEY": {
-      "type": "sst.sst.Secret"
-      "value": string
+    HONEYCOMB_API_KEY: {
+      type: "sst.sst.Secret"
+      value: string
     }
-    "OPENAI_API_KEY": {
-      "type": "sst.sst.Secret"
-      "value": string
+    OPENAI_API_KEY: {
+      type: "sst.sst.Secret"
+      value: string
     }
-    "STRIPE_SECRET_KEY": {
-      "type": "sst.sst.Secret"
-      "value": string
+    STRIPE_SECRET_KEY: {
+      type: "sst.sst.Secret"
+      value: string
     }
     STRIPE_WEBHOOK_SECRET: {
       type: "sst.sst.Linkable"
@@ -80,11 +80,11 @@ declare module "sst" {
 import * as cloudflare from "@cloudflare/workers-types"
 declare module "sst" {
   export interface Resource {
-    "Api": cloudflare.Service
-    "AuthApi": cloudflare.Service
-    "AuthStorage": cloudflare.KVNamespace
-    "Bucket": cloudflare.R2Bucket
-    "LogProcessor": cloudflare.Service
+    Api: cloudflare.Service
+    AuthApi: cloudflare.Service
+    AuthStorage: cloudflare.KVNamespace
+    Bucket: cloudflare.R2Bucket
+    LogProcessor: cloudflare.Service
   }
 }
 

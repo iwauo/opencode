@@ -162,12 +162,28 @@ export namespace File {
       .catch(() => "")
       .then((x) => x.trim())
     if (project.vcs === "git") {
-      const diff = await $`git diff ${file}`.cwd(Instance.directory).quiet().nothrow().text()
+      const diff = await $`git diff ${file}`
+        .cwd(Instance.directory)
+        .quiet()
+        .nothrow()
+        .text()
       if (diff.trim()) {
-        const original = await $`git show HEAD:${file}`.cwd(Instance.directory).quiet().nothrow().text()
-        const patch = structuredPatch(file, file, original, content, "old", "new", {
-          context: Infinity,
-        })
+        const original = await $`git show HEAD:${file}`
+          .cwd(Instance.directory)
+          .quiet()
+          .nothrow()
+          .text()
+        const patch = structuredPatch(
+          file,
+          file,
+          original,
+          content,
+          "old",
+          "new",
+          {
+            context: Infinity,
+          },
+        )
         const diff = formatPatch(patch)
         return { content, patch, diff }
       }

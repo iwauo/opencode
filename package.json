@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "bun run --conditions=development packages/opencode/src/index.ts",
     "typecheck": "bun run --filter='*' typecheck",
-    "format": "bun run prettier --write .",
+    "format": "git ls-files | bun run prettier --ignore-unknown --write",
     "generate": "(cd packages/sdk && ./js/script/generate.ts) && (cd packages/sdk/stainless && ./generate.ts)",
     "postinstall": "./script/hooks"
   },

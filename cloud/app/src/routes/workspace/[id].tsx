@@ -251,21 +251,37 @@ function KeysSection() {
                   <tr>
                     <td data-slot="key-name">{key.name}</td>
                     <td data-slot="key-value">
-                      <div onClick={() => copyKeyToClipboard(key.key, key.id)} title="Click to copy API key">
+                      <div
+                        onClick={() => copyKeyToClipboard(key.key, key.id)}
+                        title="Click to copy API key"
+                      >
                         <span>{formatKey(key.key)}</span>
                         <Show
                           when={copiedId() === key.id}
-                          fallback={<IconCopy style={{ width: "14px", height: "14px" }} />}
+                          fallback={
+                            <IconCopy
+                              style={{ width: "14px", height: "14px" }}
+                            />
+                          }
                         >
-                          <IconCheck style={{ width: "14px", height: "14px" }} />
+                          <IconCheck
+                            style={{ width: "14px", height: "14px" }}
+                          />
                         </Show>
                       </div>
                     </td>
-                    <td data-slot="key-date" title={formatDateUTC(key.timeCreated)}>
+                    <td
+                      data-slot="key-date"
+                      title={formatDateUTC(key.timeCreated)}
+                    >
                       {formatDateForTable(key.timeCreated)}
                     </td>
                     <td data-slot="key-actions">
-                      <button data-color="ghost" onClick={() => handleDeleteKey(key.id)} title="Delete API key">
+                      <button
+                        data-color="ghost"
+                        onClick={() => handleDeleteKey(key.id)}
+                        title="Delete API key"
+                      >
                         Delete
                       </button>
                     </td>
@@ -315,19 +331,29 @@ function BalanceSection() {
         <div
           data-slot="amount"
           data-state={(() => {
-            const balanceStr = ((balanceInfo()?.balance ?? 0) / 100000000).toFixed(2)
-            return balanceStr === "0.00" || balanceStr === "-0.00" ? "danger" : undefined
+            const balanceStr = (
+              (balanceInfo()?.balance ?? 0) / 100000000
+            ).toFixed(2)
+            return balanceStr === "0.00" || balanceStr === "-0.00"
+              ? "danger"
+              : undefined
           })()}
         >
           <span data-slot="currency">$</span>
           <span data-slot="value">
             {(() => {
-              const balanceStr = ((balanceInfo()?.balance ?? 0) / 100000000).toFixed(2)
+              const balanceStr = (
+                (balanceInfo()?.balance ?? 0) / 100000000
+              ).toFixed(2)
               return balanceStr === "-0.00" ? "0.00" : balanceStr
             })()}
           </span>
         </div>
-        <button data-color="primary" disabled={createCheckoutUrlSubmission.pending} onClick={handleBuyCredits}>
+        <button
+          data-color="primary"
+          disabled={createCheckoutUrlSubmission.pending}
+          onClick={handleBuyCredits}
+        >
           {createCheckoutUrlSubmission.pending ? "Loading..." : "Buy Credits"}
         </button>
       </div>
@@ -411,7 +437,9 @@ function UsageSection() {
                       <td data-slot="usage-model">{usage.model}</td>
                       <td data-slot="usage-tokens">{usage.inputTokens}</td>
                       <td data-slot="usage-tokens">{usage.outputTokens}</td>
-                      <td data-slot="usage-cost">${((usage.cost ?? 0) / 100000000).toFixed(4)}</td>
+                      <td data-slot="usage-cost">
+                        ${((usage.cost ?? 0) / 100000000).toFixed(4)}
+                      </td>
                     </tr>
                   )
                 }}
@@ -442,50 +470,59 @@ function PaymentsSection() {
   const payments = createAsync(() => getPaymentsInfo(params.id))
   // const payments = () => dummyPayments
 
-  return payments() && payments()!.length > 0 && (
-    <section data-component="payments-section">
-      <div data-slot="section-title">
-        <h2>Payments History</h2>
-        <p>Recent payment transactions.</p>
-      </div>
-      <div data-slot="payments-table">
-        <table data-slot="payments-table-element">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Payment ID</th>
-              <th>Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            <For each={payments()!}>
-              {(payment) => {
-                const date = new Date(payment.timeCreated)
-                return (
-                  <tr>
-                    <td data-slot="payment-date" title={formatDateUTC(date)}>
-                      {formatDateForTable(date)}
-                    </td>
-                    <td data-slot="payment-id">{payment.id}</td>
-                    <td data-slot="payment-amount">${((payment.amount ?? 0) / 100000000).toFixed(2)}</td>
-                  </tr>
-                )
-              }}
-            </For>
-          </tbody>
-        </table>
-      </div>
-    </section>
+  return (
+    payments() &&
+    payments()!.length > 0 && (
+      <section data-component="payments-section">
+        <div data-slot="section-title">
+          <h2>Payments History</h2>
+          <p>Recent payment transactions.</p>
+        </div>
+        <div data-slot="payments-table">
+          <table data-slot="payments-table-element">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Payment ID</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <For each={payments()!}>
+                {(payment) => {
+                  const date = new Date(payment.timeCreated)
+                  return (
+                    <tr>
+                      <td data-slot="payment-date" title={formatDateUTC(date)}>
+                        {formatDateForTable(date)}
+                      </td>
+                      <td data-slot="payment-id">{payment.id}</td>
+                      <td data-slot="payment-amount">
+                        ${((payment.amount ?? 0) / 100000000).toFixed(2)}
+                      </td>
+                    </tr>
+                  )
+                }}
+              </For>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    )
   )
 }
 
-export default function() {
+export default function () {
   return (
     <div data-page="workspace-[id]">
       <section data-component="title-section">
         <h1>Zen</h1>
         <p>
-          Curated list of models provided by opencode. <a target="_blank" href="/docs/zen">Learn more</a>.
+          Curated list of models provided by opencode.{" "}
+          <a target="_blank" href="/docs/zen">
+            Learn more
+          </a>
+          .
         </p>
       </section>
 

@@ -784,19 +784,28 @@ export namespace LSPServer {
       let binary = Bun.which("svelteserver")
       const args: string[] = []
       if (!binary) {
-        const js = path.join(Global.Path.bin, "node_modules", "svelte-language-server", "bin", "server.js")
+        const js = path.join(
+          Global.Path.bin,
+          "node_modules",
+          "svelte-language-server",
+          "bin",
+          "server.js",
+        )
         if (!(await Bun.file(js).exists())) {
           if (Flag.OPENCODE_DISABLE_LSP_DOWNLOAD) return
-          await Bun.spawn([BunProc.which(), "install", "svelte-language-server"], {
-            cwd: Global.Path.bin,
-            env: {
-              ...process.env,
-              BUN_BE_BUN: "1",
+          await Bun.spawn(
+            [BunProc.which(), "install", "svelte-language-server"],
+            {
+              cwd: Global.Path.bin,
+              env: {
+                ...process.env,
+                BUN_BE_BUN: "1",
+              },
+              stdout: "pipe",
+              stderr: "pipe",
+              stdin: "pipe",
             },
-            stdout: "pipe",
-            stderr: "pipe",
-            stdin: "pipe",
-          }).exited
+          ).exited
         }
         binary = BunProc.which()
         args.push("run", js)

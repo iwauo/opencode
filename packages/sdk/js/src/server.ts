@@ -113,7 +113,7 @@ export function createOpencodeTui(options?: TuiOptions) {
 
   const proc = spawn(`opencode`, args, {
     signal: options?.signal,
-    stdio: 'inherit',
+    stdio: "inherit",
     env: {
       ...process.env,
       OPENCODE_CONFIG_CONTENT: JSON.stringify(options?.config ?? {}),

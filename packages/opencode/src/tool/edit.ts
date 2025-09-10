@@ -674,5 +674,7 @@ export function replace(
   if (notFound) {
     throw new Error("oldString not found in content")
   }
-  throw new Error("oldString found multiple times and requires more code context to uniquely identify the intended match")
+  throw new Error(
+    "oldString found multiple times and requires more code context to uniquely identify the intended match",
+  )
 }

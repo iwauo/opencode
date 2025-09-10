@@ -12,8 +12,16 @@ export default function NotFound() {
       <div data-component="content">
         <section data-component="top">
           <a href="/" data-slot="logo-link">
-            <img data-slot="logo light" src={logoLight} alt="opencode logo light" />
-            <img data-slot="logo dark" src={logoDark} alt="opencode logo dark" />
+            <img
+              data-slot="logo light"
+              src={logoLight}
+              alt="opencode logo light"
+            />
+            <img
+              data-slot="logo dark"
+              src={logoDark}
+              alt="opencode logo dark"
+            />
           </a>
           <h1 data-slot="title">404 - Page Not Found</h1>
         </section>
