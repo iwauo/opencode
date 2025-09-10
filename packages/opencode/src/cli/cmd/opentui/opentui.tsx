@@ -62,6 +62,11 @@ function App() {
       return
     }
 
+    if (evt.meta && evt.name === "t") {
+      renderer.toggleDebugOverlay()
+      return
+    }
+
     if (evt.meta && evt.name === "d") {
       renderer.console.toggle()
       return
